@@ -1,6 +1,9 @@
 defmodule VideoCallWeb.PageController do
   use VideoCallWeb, :controller
 
+  @type conn :: Plug.Conn.t()
+
+  @spec home(conn(), map()) :: conn()
   def home(conn, _params) do
     # The home page is often custom made,
     # so skip the default app layout.

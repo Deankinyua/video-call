@@ -9,7 +9,34 @@ defmodule VideoCall.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: ne3ko_deps() ++ phoenix_deps(),
+      dialyzer: [
+        # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
+        plt_add_apps: [:ex_unit, :mix],
+        plt_file: {:no_warn, "priv/plts/project.plt"}
+      ],
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        ci: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.html": :test
+      ],
+
+      # Docs
+      name: "Video Call",
+      source_url: "https://github.com/Deankinyua/video-call",
+      # homepage_url: "http://YOUR_PROJECT_HOMEPAGE",
+      docs: &docs/0
+    ]
+  end
+
+  defp docs do
+    [
+      # The main page in the docs
+      main: "Video Call",
+      # logo: "priv/static/images/invoice_logo.svg",
+      extras: ["README.md"]
     ]
   end
 
@@ -30,7 +57,18 @@ defmodule VideoCall.MixProject do
   # Specifies your project dependencies.
   #
   # Type `mix help deps` for examples and options.
-  defp deps do
+
+  defp ne3ko_deps do
+    [
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: :test, runtime: false},
+      {:ex_doc, "~> 0.34", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:mix_audit, "~> 2.1", only: :test, runtime: false}
+    ]
+  end
+
+  defp phoenix_deps do
     [
       {:phoenix, "~> 1.7.18"},
       {:phoenix_ecto, "~> 4.5"},
@@ -67,6 +105,7 @@ defmodule VideoCall.MixProject do
   #     $ mix setup
   #
   # See the documentation for `Mix` for more info on aliases.
+
   defp aliases do
     [
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
@@ -74,12 +113,23 @@ defmodule VideoCall.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind video_call", "esbuild video_call"],
+      "assets.build": ["tailwind invoice_generator", "esbuild invoice_generator"],
       "assets.deploy": [
-        "tailwind video_call --minify",
-        "esbuild video_call --minify",
+        "tailwind invoice_generator --minify",
+        "esbuild invoice_generator --minify",
         "phx.digest"
-      ]
+      ],
+      ci: [
+        "deps.unlock --check-unused",
+        "deps.audit",
+        "hex.audit",
+        "format --check-formatted",
+        "cmd npx prettier -c .",
+        "credo --strict",
+        "dialyzer",
+        "test --cover --warnings-as-errors"
+      ],
+      prettier: ["cmd npx prettier -w ."]
     ]
   end
 end

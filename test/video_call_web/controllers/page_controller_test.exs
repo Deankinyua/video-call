@@ -1,5 +1,5 @@
 defmodule VideoCallWeb.PageControllerTest do
-  use VideoCallWeb.ConnCase
+  use VideoCallWeb.ConnCase, async: true
 
   test "GET /", %{conn: conn} do
     conn = get(conn, ~p"/")

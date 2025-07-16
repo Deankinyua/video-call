@@ -18,6 +18,7 @@ defmodule VideoCallWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/video", VideoLive.Index, :index
   end
 
   # Other scopes may use custom stacks.
