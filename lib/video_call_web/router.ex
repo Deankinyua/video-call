@@ -1,6 +1,8 @@
 defmodule VideoCallWeb.Router do
   use VideoCallWeb, :router
 
+  import VideoCallWeb.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,23 +10,44 @@ defmodule VideoCallWeb.Router do
     plug :put_root_layout, html: {VideoCallWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
-  scope "/", VideoCallWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-    live "/video", VideoLive.Index, :index
-  end
+  # pipeline :api do
+  #   plug :accepts, ["json"]
+  # end
 
   # Other scopes may use custom stacks.
   # scope "/api", VideoCallWeb do
   #   pipe_through :api
   # end
+
+  scope "/", VideoCallWeb do
+    pipe_through [:browser]
+
+    delete "/sign-out", UserSessionController, :delete
+    post "/sign-in", UserSessionController, :create
+  end
+
+  scope "/", VideoCallWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{VideoCallWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/sign-up", AuthLive.SignUp, :new
+      live "/sign-in", AuthLive.SignIn, :new
+    end
+  end
+
+  scope "/", VideoCallWeb do
+    # pipe_through the :require_authenticated_user plug imported from VideoCallWeb.UserAuth
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{VideoCallWeb.UserAuth, :ensure_authenticated}] do
+      live "/", VideoLive.Index, :index
+    end
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:video_call, :dev_routes) do

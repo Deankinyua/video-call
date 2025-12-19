@@ -17,6 +17,12 @@ defmodule VideoCallWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias VideoCall.Accounts
+  alias VideoCall.Accounts.User
+
+  @type conn :: Plug.Conn.t()
+  @type user :: User.t()
+
   using do
     quote do
       # The default endpoint for testing
@@ -34,5 +40,19 @@ defmodule VideoCallWeb.ConnCase do
   setup tags do
     VideoCall.DataCase.setup_sandbox(tags)
     {:ok, conn: Phoenix.ConnTest.build_conn()}
+  end
+
+  @doc """
+  Logs the given `user` into the `conn`.
+
+  It returns an updated `conn`.
+  """
+  @spec log_in_user(conn(), user()) :: conn()
+  def log_in_user(conn, user) do
+    token = Accounts.generate_user_session_token(user)
+
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> Plug.Conn.put_session(:user_token, token)
   end
 end
