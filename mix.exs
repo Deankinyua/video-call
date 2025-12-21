@@ -114,10 +114,10 @@ defmodule VideoCall.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind invoice_generator", "esbuild invoice_generator"],
+      "assets.build": ["tailwind video_call", "esbuild video_call"],
       "assets.deploy": [
-        "tailwind invoice_generator --minify",
-        "esbuild invoice_generator --minify",
+        "tailwind video_call --minify",
+        "esbuild video_call --minify",
         "phx.digest"
       ],
       ci: [
