@@ -50,7 +50,9 @@ defmodule VideoCallWeb.AuthLive.SignUp do
           <.input field={@form[:password]} type="password" label="Password" required />
 
           <:actions>
-            <.button phx-disable-with="Creating account..." class="w-full">Create an account</.button>
+            <.button phx-disable-with="Creating account..." class="w-full">
+              Create an account
+            </.button>
           </:actions>
         </.simple_form>
       </div>
@@ -74,13 +76,8 @@ defmodule VideoCallWeb.AuthLive.SignUp do
   @impl Phoenix.LiveView
   def handle_event("save", %{"user" => user_params}, socket) do
     case Accounts.register_user(user_params) do
-      {:ok, user} ->
-        changeset = Accounts.change_user_registration(user)
-
-        {:noreply,
-         socket
-         |> assign(:trigger_submit, true)
-         |> assign_form(changeset)}
+      {:ok, _user} ->
+        {:noreply, assign(socket, :trigger_submit, true)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply,
