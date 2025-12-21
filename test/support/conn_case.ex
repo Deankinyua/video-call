@@ -47,8 +47,8 @@ defmodule VideoCallWeb.ConnCase do
 
   It returns an updated `conn`.
   """
-  @spec log_in_user(conn(), user()) :: conn()
-  def log_in_user(conn, user) do
+  @spec sign_in_user(conn(), user()) :: conn()
+  def sign_in_user(conn, user) do
     token = Accounts.generate_user_session_token(user)
 
     conn
