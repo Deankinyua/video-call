@@ -323,3 +323,45 @@ jobs:
         env:
           MIX_ENV: test
         run: mix test --cover --warnings-as-errors
+
+  deploy_preview_app:
+    name: Deploy preview app
+    needs:
+      - compile
+      - credo
+      - deps_audit
+      - dialyzer
+      - format
+      - hex_audit
+      - migrations
+      - prettier
+      - test
+      - unused_deps
+    runs-on: ubuntu-latest
+    permissions: write-all
+    concurrency:
+      group: pr-${{ github.event.number }}
+    environment:
+      name: pr-${{ github.event.number }}
+      url: https://video-call-pr-${{ github.event.number }}.fly.dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Delete previous deployments
+        uses: strumwolf/delete-deployment-environment@v2.2.3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          environment: pr-${{ github.event.number }}
+          ref: ${{ github.head_ref }}
+          onlyRemoveDeployments: true
+      - name: Deploy preview app
+        uses: optimumBA/fly-preview-apps@main
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          FLY_ORG: kinyuadean@gmail.com
+          FLY_REGION: fra
+          PHX_HOST: video-call-pr-${{ github.event.number }}.fly.dev
+          REPO_NAME: elixir_drops
+        with:
+          name: video-call-pr-${{ github.event.number }}
+          secrets: SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
