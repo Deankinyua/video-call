@@ -15,6 +15,11 @@ defmodule VideoCall.Accounts do
   @type token :: binary()
   @type user :: User.t()
 
+  @spec list_users :: [user()]
+  def list_users do
+    Repo.all(User)
+  end
+
   @doc """
   Gets a user by email.
 
