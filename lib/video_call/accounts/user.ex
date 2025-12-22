@@ -55,6 +55,38 @@ defmodule VideoCall.Accounts.User do
     |> validate_password(opts)
   end
 
+  @doc """
+  Validates the current password otherwise adds an error to the changeset.
+  """
+  @spec validate_current_password(changeset(), password()) :: changeset()
+  def validate_current_password(changeset, password) do
+    changeset = cast(changeset, %{current_password: password}, [:current_password])
+
+    if valid_password?(changeset.data, password) do
+      changeset
+    else
+      add_error(changeset, :current_password, "is not valid")
+    end
+  end
+
+  @doc """
+  Verifies the password.
+
+  If there is no user or the user doesn't have a password, we call
+  `Bcrypt.no_user_verify/0` to avoid timing attacks.
+  """
+
+  @spec valid_password?(t(), password()) :: boolean()
+  def valid_password?(%VideoCall.Accounts.User{hashed_password: hashed_password}, password)
+      when is_binary(hashed_password) and byte_size(password) > 0 do
+    Bcrypt.verify_pass(password, hashed_password)
+  end
+
+  def valid_password?(_user, _password) do
+    Bcrypt.no_user_verify()
+    false
+  end
+
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])
@@ -98,38 +130,6 @@ defmodule VideoCall.Accounts.User do
       |> unique_constraint(:email)
     else
       changeset
-    end
-  end
-
-  @doc """
-  Verifies the password.
-
-  If there is no user or the user doesn't have a password, we call
-  `Bcrypt.no_user_verify/0` to avoid timing attacks.
-  """
-
-  @spec valid_password?(t(), password()) :: boolean()
-  def valid_password?(%VideoCall.Accounts.User{hashed_password: hashed_password}, password)
-      when is_binary(hashed_password) and byte_size(password) > 0 do
-    Bcrypt.verify_pass(password, hashed_password)
-  end
-
-  def valid_password?(_user, _password) do
-    Bcrypt.no_user_verify()
-    false
-  end
-
-  @doc """
-  Validates the current password otherwise adds an error to the changeset.
-  """
-  @spec validate_current_password(changeset(), password()) :: changeset()
-  def validate_current_password(changeset, password) do
-    changeset = cast(changeset, %{current_password: password}, [:current_password])
-
-    if valid_password?(changeset.data, password) do
-      changeset
-    else
-      add_error(changeset, :current_password, "is not valid")
     end
   end
 end

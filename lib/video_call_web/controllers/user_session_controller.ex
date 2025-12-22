@@ -9,6 +9,13 @@ defmodule VideoCallWeb.UserSessionController do
   @type conn :: Plug.Conn.t()
   @type params :: map()
 
+  @spec delete(conn(), params()) :: conn()
+  def delete(conn, _params) do
+    conn
+    |> put_flash(:info, "Logged out successfully.")
+    |> UserAuth.log_out_user()
+  end
+
   @spec create(conn(), params()) :: conn()
   def create(conn, %{"_action" => "registered"} = params),
     do: create(conn, params, "Account created successfully!")
@@ -29,12 +36,5 @@ defmodule VideoCallWeb.UserSessionController do
       |> put_flash(:error, "Invalid email or password")
       |> redirect(to: ~p"/sign-in")
     end
-  end
-
-  @spec delete(conn(), params()) :: conn()
-  def delete(conn, _params) do
-    conn
-    |> put_flash(:info, "Logged out successfully.")
-    |> UserAuth.log_out_user()
   end
 end
