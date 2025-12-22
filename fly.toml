@@ -15,6 +15,7 @@ kill_signal = 'SIGTERM'
 
 [env]
   PHX_HOST = 'videocall.fly.dev'
+  PHX_SERVER = 'true'
   PORT = '8080'
   PRIMARY_REGION = 'fra'
 
