@@ -361,7 +361,7 @@ jobs:
           FLY_ORG: ne3ko
           FLY_REGION: fra
           PHX_HOST: video-call-pr-${{ github.event.number }}.fly.dev
-          REPO_NAME: elixir_drops
+          REPO_NAME: video_call
         with:
           name: video-call-pr-${{ github.event.number }}
           secrets: SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}

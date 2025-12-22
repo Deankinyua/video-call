@@ -15,7 +15,6 @@ kill_signal = 'SIGTERM'
 
 [env]
   PHX_HOST = 'videocall.fly.dev'
-  PHX_SERVER = 'true'
   PORT = '8080'
   PRIMARY_REGION = 'fra'
 
@@ -40,6 +39,6 @@ kill_signal = 'SIGTERM'
     path = '/health'
 
 [[vm]]
-  memory = '512mb'
+  memory = '1gb'
   cpus = 1
   memory_mb = 512
