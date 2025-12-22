@@ -1,0 +1,36 @@
+defmodule VideoCall.AccountsFixtures do
+  @moduledoc """
+  This module defines test helpers for creating
+  entities via the `VideoCall.Accounts` context.
+  """
+
+  alias VideoCall.Accounts.User
+
+  @type attrs :: map()
+
+  @doc """
+  Generate a unique user email.
+  """
+  @spec unique_user_email :: String.t()
+  def unique_user_email, do: "user#{System.unique_integer()}@example.com"
+
+  @spec unique_username :: String.t()
+  def unique_username, do: "user#{System.unique_integer()}kenya"
+
+  @doc """
+  Generate a user.
+  """
+  @spec user_fixture(attrs()) :: User.t()
+  def user_fixture(attrs \\ %{}) do
+    {:ok, user} =
+      attrs
+      |> Enum.into(%{
+        email: unique_user_email(),
+        password: "helloworldkenya",
+        username: unique_username()
+      })
+      |> VideoCall.Accounts.register_user()
+
+    user
+  end
+end

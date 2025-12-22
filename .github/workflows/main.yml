@@ -1,13 +1,9 @@
-name: PR
+name: Main
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - opened
-      - reopened
-      - synchronize
 
 jobs:
   compile:
@@ -25,13 +21,13 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
           restore-keys: |
             mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-
-      - name: Install Project dependencies
+      - name: Install Elixir dependencies
         env:
           MIX_ENV: test
         run: mix deps.get
@@ -42,11 +38,10 @@ jobs:
       - name: Save dependencies cache
         uses: actions/cache/save@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
-
   credo:
     needs: compile
     name: Credo
@@ -63,17 +58,16 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
           restore-keys: |
             mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-
-      - name: Check code formatting and consistency
+      - name: Check code style
         env:
           MIX_ENV: test
         run: mix credo --strict
-
   deps_audit:
     needs: compile
     name: Deps audit
@@ -90,7 +84,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -100,7 +94,6 @@ jobs:
         env:
           MIX_ENV: test
         run: mix deps.audit
-
   dialyzer:
     needs: compile
     name: Dialyzer
@@ -117,7 +110,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -143,7 +136,6 @@ jobs:
         with:
           key: plt-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: priv/plts
-
   format:
     needs: compile
     name: Format
@@ -160,7 +152,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -170,7 +162,6 @@ jobs:
         env:
           MIX_ENV: test
         run: mix format --check-formatted
-
   hex_audit:
     needs: compile
     name: Hex audit
@@ -187,7 +178,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -197,15 +188,14 @@ jobs:
         env:
           MIX_ENV: test
         run: mix hex.audit
-
   migrations:
     services:
       db:
-        image: pgvector/pgvector:pg15
+        image: postgres:13
         ports:
           - 5432:5432
         env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PASSWORD: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     needs: compile
     name: Migrations
@@ -222,7 +212,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -236,7 +226,6 @@ jobs:
         env:
           MIX_ENV: test
         run: mix ecto.rollback --all --quiet
-
   prettier:
     name: Check formatting using Prettier
     runs-on: ubuntu-latest
@@ -247,7 +236,7 @@ jobs:
         uses: actions/cache/restore@v4
         id: npm-cache
         with:
-          key: npm-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: npm-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: node_modules
           restore-keys: |
             npm-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-
@@ -262,41 +251,14 @@ jobs:
           key: npm-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: node_modules
 
-  unused_deps:
-    needs: compile
-    name: Check unused deps
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - id: setup-beam
-        name: Set up Elixir
-        uses: erlef/setup-beam@v1
-        with:
-          version-file: .tool-versions
-          version-type: strict
-      - name: Restore dependencies cache
-        uses: actions/cache/restore@v4
-        with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
-          path: |
-            _build
-            deps
-          restore-keys: |
-            mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-
-      - name: Check for unused Mix dependencies
-        env:
-          MIX_ENV: test
-        run: mix deps.unlock --check-unused
-
   test:
     services:
       db:
-        image: pgvector/pgvector:pg15
+        image: postgres:13
         ports:
           - 5432:5432
         env:
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_PASSWORD: postgres
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     needs: compile
     name: Test
@@ -313,7 +275,7 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache/restore@v4
         with:
-          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ github.sha }}
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
           path: |
             _build
             deps
@@ -323,9 +285,34 @@ jobs:
         env:
           MIX_ENV: test
         run: mix test --cover --warnings-as-errors
-
-  deploy_preview_app:
-    name: Deploy preview app
+  unused_deps:
+    needs: compile
+    name: Check unused deps
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: setup-beam
+        name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+      - name: Restore dependencies cache
+        uses: actions/cache/restore@v4
+        with:
+          key: mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-${{ github.sha }}
+          path: |
+            _build
+            deps
+          restore-keys: |
+            mix-${{ runner.os }}-${{ steps.setup-beam.outputs.elixir-version }}-${{ steps.setup-beam.outputs.otp-version }}-
+      - name: Check for unused Mix dependencies
+        env:
+          MIX_ENV: test
+        run: mix deps.unlock --check-unused
+  deploy_app:
+    name: Deploy staging app
     needs:
       - compile
       - credo
@@ -338,30 +325,11 @@ jobs:
       - test
       - unused_deps
     runs-on: ubuntu-latest
-    permissions: write-all
-    concurrency:
-      group: pr-${{ github.event.number }}
-    environment:
-      name: pr-${{ github.event.number }}
-      url: https://video-call-pr-${{ github.event.number }}.fly.dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Delete previous deployments
-        uses: strumwolf/delete-deployment-environment@v2.2.3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          environment: pr-${{ github.event.number }}
-          ref: ${{ github.head_ref }}
-          onlyRemoveDeployments: true
-      - name: Deploy preview app
-        uses: optimumBA/fly-preview-apps@main
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
           FLY_ORG: ne3ko
-          FLY_REGION: fra
-          PHX_HOST: video-call-pr-${{ github.event.number }}.fly.dev
-          REPO_NAME: video_call
-        with:
-          name: video-call-pr-${{ github.event.number }}
-          secrets: PHX_HOST=${{ env.PHX_HOST }} SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}

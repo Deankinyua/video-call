@@ -20,8 +20,6 @@ defmodule VideoCall.Application do
       VideoCallWeb.Endpoint
     ]
 
-    # See https://hexdocs.pm/elixir/Supervisor.html
-    # for other strategies and supported options
     opts = [strategy: :one_for_one, name: VideoCall.Supervisor]
     Supervisor.start_link(children, opts)
   end

@@ -1,22 +1,20 @@
-# fly.toml app configuration file generated for videocall on 2025-12-21T17:27:17+03:00
+# fly.toml app configuration file generated for video-call-misty-sun-5606 on 2025-12-22T14:03:31+03:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'videocall'
+app = 'video-call'
 primary_region = 'fra'
 kill_signal = 'SIGTERM'
 
 [build]
 
 [deploy]
-  strategy = 'immediate'
   release_command = '/app/bin/migrate'
 
 [env]
-  PHX_HOST = 'videocall.fly.dev'
+  PHX_HOST = 'video-call.fly.dev'
   PORT = '8080'
-  PRIMARY_REGION = 'fra'
 
 [http_service]
   internal_port = 8080
@@ -31,14 +29,8 @@ kill_signal = 'SIGTERM'
     hard_limit = 1000
     soft_limit = 1000
 
-  [[http_service.checks]]
-    interval = '10s'
-    timeout = '2s'
-    grace_period = '15s'
-    method = 'GET'
-    path = '/health'
-
 [[vm]]
-  memory = '512mb'
+  memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
-  memory_mb = 512
+  memory_mb = 1024
