@@ -358,7 +358,7 @@ jobs:
         uses: optimumBA/fly-preview-apps@main
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          FLY_ORG: kinyuadean@gmail.com
+          FLY_ORG: ne3ko
           FLY_REGION: fra
           PHX_HOST: video-call-pr-${{ github.event.number }}.fly.dev
           REPO_NAME: elixir_drops
