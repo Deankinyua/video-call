@@ -364,4 +364,4 @@ jobs:
           REPO_NAME: video_call
         with:
           name: video-call-pr-${{ github.event.number }}
-          secrets: SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }}
+          secrets: SECRET_KEY_BASE=${{ secrets.SECRET_KEY_BASE }} PHX_HOST=${{ env.PHX_HOST }}
