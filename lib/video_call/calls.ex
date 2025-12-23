@@ -25,16 +25,26 @@ defmodule VideoCall.Calls do
 
   ## Examples
 
-      iex> call("550e8400-e29b-41d4-a716-446655440000", "dean")
-      :ok
+      iex>
 
   """
   @spec call(user_id(), username(), caller_id()) :: :ok
-  def call(recipient_id, caller_username, caller_id) do
+  def call(recipient_id, caller_username, caller_id),
+    do: send_message(recipient_id, {:new_call, caller_username, caller_id})
+
+  @spec send_ice_candidates(user_id(), any()) :: :ok
+  def send_ice_candidates(recipient_id, candidate),
+    do: send_message(recipient_id, {:new_candidate, candidate})
+
+  @spec send_answer_to_offerer(user_id(), any()) :: :ok
+  def send_answer_to_offerer(recipient_id, answer),
+    do: send_message(recipient_id, {:answer_to_offer, answer})
+
+  defp send_message(recipient_id, message) do
     Phoenix.PubSub.broadcast(
       VideoCall.PubSub,
       "calls-#{recipient_id}",
-      {:new_call, caller_username, caller_id}
+      message
     )
   end
 end

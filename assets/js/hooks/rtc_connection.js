@@ -26,8 +26,21 @@ RtcConnectionHooks.RtcConnection = {
     this.init();
 
     this.handleEvent("answer", ({ offer_obj }) => {
-      console.log("We just answered the call");
-      console.log(offer_obj);
+      this.answerOffer(offer_obj);
+    });
+
+    this.handleEvent("offerer_ice_candidates", ({ candidates }) => {
+      candidates.forEach((c) => {
+        this.peerConnection.addIceCandidate(c);
+      });
+    });
+
+    this.handleEvent("add_ice_candidates_from_other_peer", ({ candidate }) => {
+      this.peerConnection.addIceCandidate(candidate);
+    });
+
+    this.handleEvent("add_answer", ({ answer }) => {
+      this.addAnswer(answer);
     });
   },
 
@@ -71,6 +84,41 @@ RtcConnectionHooks.RtcConnection = {
     });
   },
 
+  async answerOffer(offerObj) {
+    // On the receiver side we will do this using the offer
+    await this.fetchUserMedia();
+    // * This will set the remoteDescription of CLIENT2 as the offer
+    await this.createPeerConnection(offerObj);
+    const answer = await this.peerConnection.createAnswer();
+    //this is CLIENT2, and CLIENT2 uses the answer as the localDesc
+    await this.peerConnection.setLocalDescription(answer);
+
+    //add the answer to the offerObj
+    // offerObj.answer = answer;
+
+    //emit the answer to the signaling server, so it can emit to CLIENT1
+    //expect a response from the server with the already existing offerer ICE candidates
+    // please note that this socket belongs to the answerer
+
+    this.pushEvent("add_offerer_ice_candidates_to_answerer", {
+      offerer: offerObj.offerer,
+    });
+
+    this.pushEvent("set_remote_description_of_offerer", {
+      answer: answer,
+      offerer: offerObj.offerer,
+    });
+  },
+
+  async addAnswer(answer) {
+    //addAnswer is called in socketListeners when an answerResponse is emitted.
+    //at this point, the offer and answer have been exchanged!
+    //now CLIENT1 needs to set the remote
+    await this.peerConnection.setRemoteDescription(answer);
+    // and that's about it!!
+    console.log(this.peerConnection.signalingState);
+  },
+
   createPeerConnection(offerObj) {
     return new Promise(async (resolve, reject) => {
       //RTCPeerConnection is the thing that creates the connection
@@ -98,11 +146,11 @@ RtcConnectionHooks.RtcConnection = {
         if (e.candidate) {
           // This is how we are going propagate ice candidates to the other peer
           // if didIOffer is true, then this ice candidates belong to the offerer, else they belong to the answerer
-          //   socket.emit("sendIceCandidateToSignalingServer", {
-          //     iceCandidate: e.candidate,
-          //     iceUserName: userName,
-          //     didIOffer,
-          //   });
+
+          this.pushEvent("send_ice_candidates_to_signalling_server", {
+            did_i_offer: this.didIOffer,
+            ice_candidate: e.candidate,
+          });
         }
       });
 
