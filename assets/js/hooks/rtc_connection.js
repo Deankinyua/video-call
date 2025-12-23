@@ -24,6 +24,11 @@ RtcConnectionHooks.RtcConnection = {
     };
 
     this.init();
+
+    this.handleEvent("answer", ({ offer_obj }) => {
+      console.log("We just answered the call");
+      console.log(offer_obj);
+    });
   },
 
   async init() {
@@ -40,7 +45,7 @@ RtcConnectionHooks.RtcConnection = {
       // setLocalDescription is called so that the 2 peers eventually agree on a configuration
       this.peerConnection.setLocalDescription(offer);
       this.didIOffer = true;
-      this.pushEvent("new-offer", { offer: offer }); //send offer to signalingServer
+      this.pushEvent("new_offer", { offer: offer }); //send offer to signalingServer
     } catch (err) {
       console.log(err);
     }

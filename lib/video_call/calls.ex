@@ -2,7 +2,7 @@ defmodule VideoCall.Calls do
   @moduledoc """
   Responsible for notifying someone of an incoming call.
   """
-
+  @type caller_id :: Ecto.UUID.t()
   @type user_id :: Ecto.UUID.t()
   @type username :: String.t()
 
@@ -29,12 +29,12 @@ defmodule VideoCall.Calls do
       :ok
 
   """
-  @spec call(user_id(), username()) :: :ok
-  def call(recipient_id, caller_username) do
+  @spec call(user_id(), username(), caller_id()) :: :ok
+  def call(recipient_id, caller_username, caller_id) do
     Phoenix.PubSub.broadcast(
       VideoCall.PubSub,
       "calls-#{recipient_id}",
-      {:new_call, caller_username}
+      {:new_call, caller_username, caller_id}
     )
   end
 end

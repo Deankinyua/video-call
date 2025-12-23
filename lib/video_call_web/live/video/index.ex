@@ -109,7 +109,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_event("new-offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("new_offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
     offer_object = %{
       offerer: user.id,
       offer: offer,
@@ -122,6 +122,12 @@ defmodule VideoCallWeb.VideoLive.Index do
     {:noreply, assign(socket, :current_offer, offer_object)}
   end
 
+  def handle_event("answer", _params, %{assigns: %{caller_id: caller_id}} = socket) do
+    offer_obj = WebrtcServer.get_offer(caller_id)
+
+    {:noreply, push_event(socket, "answer", %{offer_obj: offer_obj})}
+  end
+
   @impl Phoenix.LiveView
   def handle_info(
         {:notify_recipient, recipient_id},
@@ -132,18 +138,19 @@ defmodule VideoCallWeb.VideoLive.Index do
       |> Map.put(:answerer, recipient_id)
       |> WebrtcServer.store_offer()
 
-    Calls.call(recipient_id, user.username)
+    Calls.call(recipient_id, user.username, user.id)
     {:noreply, socket}
   end
 
   @impl Phoenix.LiveView
   def handle_info(
-        {:new_call, caller_username},
+        {:new_call, caller_username, caller_id},
         socket
       ) do
     {:noreply,
      socket
      |> assign(:caller, caller_username)
+     |> assign(:caller_id, caller_id)
      |> assign(:show_call_notification, true)}
   end
 end
