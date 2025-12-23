@@ -15,7 +15,7 @@ defmodule VideoCall.WebrtcServer do
 
   @impl GenServer
   def init(_state) do
-    {:ok, %{offers: []}}
+    {:ok, %{offers: %{}}}
   end
 
   @spec store_offer(map()) :: :ok
@@ -30,14 +30,14 @@ defmodule VideoCall.WebrtcServer do
 
   @impl GenServer
   def handle_call({:new_offer, offer_object}, _from, state) do
-    offers = [offer_object | state.offers]
+    offers = Map.put(state.offers, offer_object.offerer, offer_object)
     state = Map.put(state, :offers, offers)
 
     {:reply, :ok, state}
   end
 
   def handle_call({:get_offer, offerer}, _from, state) do
-    offer_obj = Enum.find(state.offers, fn off -> off.offerer == offerer end)
+    offer_obj = state.offers[offerer]
 
     {:reply, offer_obj, state}
   end
