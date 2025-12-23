@@ -1,9 +1,9 @@
 defmodule VideoCallWeb.VideoLive.Index do
   use VideoCallWeb, :live_view
 
-  import VideoCallWeb.ContactComponents
-
   alias VideoCall.Accounts
+  # alias VideoCall.WebrtcServer
+  alias VideoCallWeb.ContactComponent
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -40,7 +40,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       <div id="contacts" class="w-[24rem] absolute top-8 right-8">
         <div class="mb-2">Contacts</div>
         <div :for={contact <- @contacts}>
-          <.contact_component username={contact.username} />
+          <.live_component contact={contact} id={"contact-#{contact.id}"} module={ContactComponent} />
         </div>
       </div>
     </div>
@@ -52,5 +52,19 @@ defmodule VideoCallWeb.VideoLive.Index do
     contacts = Accounts.list_users()
 
     {:ok, assign(socket, :contacts, contacts)}
+  end
+
+  @impl Phoenix.LiveView
+  def handle_event("new-offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
+    offer_object = %{
+      offerer: user.id,
+      offer: offer,
+      offerIceCandidates: [],
+      answerer: nil,
+      answer: nil,
+      answererIceCandidates: []
+    }
+
+    {:noreply, assign(socket, :current_offer, offer_object)}
   end
 end
