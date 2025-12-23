@@ -70,7 +70,7 @@ RtcConnectionHooks.RtcConnection = {
         // getUserMedia returns a promise so we have to handle it with await to get the stream
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
-          // audio: true,
+          audio: true,
         });
 
         // * so that you can see yourself on the screen
