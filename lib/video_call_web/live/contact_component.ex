@@ -17,7 +17,11 @@ defmodule VideoCallWeb.ContactComponent do
         </div>
         <div>{@contact.username}</div>
       </section>
-      <section class="w-11 h-11 rounded-full bg-[#34C759] flex items-center justify-center">
+      <button
+        class="w-11 h-11 rounded-full bg-[#34C759] flex items-center justify-center"
+        phx-target={@myself}
+        phx-click={JS.push("call")}
+      >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-5">
           <path
             fill-rule="evenodd"
@@ -25,8 +29,15 @@ defmodule VideoCallWeb.ContactComponent do
             clip-rule="evenodd"
           />
         </svg>
-      </section>
+      </button>
     </div>
     """
+  end
+
+  @impl Phoenix.LiveComponent
+  def handle_event("call", _params, socket) do
+    contact = socket.assigns.contact
+    send(self(), {:notify_recipient, contact.id})
+    {:noreply, socket}
   end
 end
