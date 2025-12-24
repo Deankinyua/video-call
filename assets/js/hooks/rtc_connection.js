@@ -71,15 +71,15 @@ RtcConnectionHooks.RtcConnection = {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { exact: 1280 }, height: { exact: 720 } },
           audio: {
-            // volume: 0.3,
-            // sampleSize: 16,
-            // sampleRate: 44100,
-            // echoCancellation: true,
-            // noiseSuppression: true,
+            volume: 0.3,
+            sampleSize: 16,
+            sampleRate: 44100,
+            echoCancellation: true,
+            noiseSuppression: true,
             autoGainControl: false,
-            echoCancellation: false,
+            // echoCancellation: false,
             googAutoGainControl: false,
-            noiseSuppression: false,
+            // noiseSuppression: false,
           },
         });
 
