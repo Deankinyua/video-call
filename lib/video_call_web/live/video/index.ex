@@ -68,18 +68,12 @@ defmodule VideoCallWeb.VideoLive.Index do
               id="local-video"
               autoplay
               playsinline
-              controls
+              muted
             >
             </video>
           </div>
           <div>
-            <video
-              class="w-[30rem] h-[20rem] remote-video"
-              id="remote-video"
-              autoplay
-              playsinline
-              controls
-            >
+            <video class="w-[30rem] h-[20rem] remote-video" id="remote-video" autoplay playsinline>
             </video>
           </div>
         </div>
