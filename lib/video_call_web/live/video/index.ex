@@ -170,7 +170,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         %{assigns: %{current_user: user}} = socket
       ) do
     Calls.call(recipient_id, user.username, user.id)
-    {:noreply, socket}
+    {:noreply, push_event(socket, "create_offer", %{})}
   end
 
   def handle_info(

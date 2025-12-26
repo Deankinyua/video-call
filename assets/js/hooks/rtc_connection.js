@@ -25,6 +25,10 @@ RtcConnectionHooks.RtcConnection = {
 
     this.init();
 
+    this.handleEvent("create_offer", () => {
+      this.createOffer();
+    });
+
     this.handleEvent("answer", ({ offer_obj }) => {
       this.answerOffer(offer_obj);
     });
@@ -46,7 +50,9 @@ RtcConnectionHooks.RtcConnection = {
 
   async init() {
     await this.fetchUserMedia();
+  },
 
+  async createOffer() {
     //peerConnection is all set with our STUN servers sent over
     await this.createPeerConnection();
 
