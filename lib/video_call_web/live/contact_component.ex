@@ -6,7 +6,7 @@ defmodule VideoCallWeb.ContactComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <div class="flex mb-2 justify-between items-center border border-red-400">
+    <div class="flex justify-between items-center p-2">
       <section class="flex gap-4 items-center">
         <div class="shrink-0">
           <img
@@ -15,7 +15,7 @@ defmodule VideoCallWeb.ContactComponent do
             class="w-12 h-12 rounded-full object-cover"
           />
         </div>
-        <div>{@contact.username}</div>
+        <div class="text-lg">{@contact.username}</div>
       </section>
       <button
         class="w-11 h-11 rounded-full bg-[#34C759] flex items-center justify-center"
