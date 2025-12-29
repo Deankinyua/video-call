@@ -87,10 +87,10 @@ defmodule VideoCallWeb.VideoLive.Index do
     offer_object = %{
       offerer: user.id,
       offer: offer,
-      offererIceCandidates: [],
+      offerer_ice_candidates: [],
       answerer: nil,
       answer: nil,
-      answererIceCandidates: []
+      answerer_ice_candidates: []
     }
 
     :ok = WebrtcServer.store_offer(offer_object)
@@ -135,7 +135,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         %{"offerer" => offerer},
         socket
       ) do
-    offerer_ice_candidates = WebrtcServer.get_candidates(offerer, :offererIceCandidates)
+    offerer_ice_candidates = WebrtcServer.get_candidates(offerer, :offerer_ice_candidates)
 
     {:noreply,
      push_event(socket, "offerer_ice_candidates", %{candidates: offerer_ice_candidates})}

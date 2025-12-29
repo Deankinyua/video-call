@@ -82,9 +82,9 @@ defmodule VideoCall.WebrtcServer do
         answerer = offer_obj.answerer
         Calls.send_ice_candidates(answerer, candidate)
 
-        ice_candidates = [candidate | offer_obj.offererIceCandidates]
+        ice_candidates = [candidate | offer_obj.offerer_ice_candidates]
 
-        updated_offer_obj = Map.put(offer_obj, :offererIceCandidates, ice_candidates)
+        updated_offer_obj = Map.put(offer_obj, :offerer_ice_candidates, ice_candidates)
 
         update_offer_object(updated_offer_obj, state)
       else
@@ -105,9 +105,9 @@ defmodule VideoCall.WebrtcServer do
         offerer = offer_obj.offerer
         Calls.send_ice_candidates(offerer, candidate)
 
-        ice_candidates = [candidate | offer_obj.answererIceCandidates]
+        ice_candidates = [candidate | offer_obj.answerer_ice_candidates]
 
-        updated_offer_obj = Map.put(offer_obj, :answererIceCandidates, ice_candidates)
+        updated_offer_obj = Map.put(offer_obj, :answerer_ice_candidates, ice_candidates)
 
         update_offer_object(updated_offer_obj, state)
       else

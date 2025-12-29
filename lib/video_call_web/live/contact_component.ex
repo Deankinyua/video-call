@@ -20,7 +20,9 @@ defmodule VideoCallWeb.ContactComponent do
       <button
         class="w-11 h-11 rounded-full bg-[#34C759] flex items-center justify-center"
         phx-target={@myself}
-        phx-click={JS.push("call")}
+        phx-click={
+          JS.hide(to: "#contacts", transition: "ease-in-out duration-300") |> JS.push("call")
+        }
       >
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-5">
           <path
