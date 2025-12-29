@@ -129,7 +129,6 @@ RtcConnectionHooks.RtcConnection = {
     //now CLIENT1 needs to set the remote
     await this.peerConnection.setRemoteDescription(answer);
     // and that's about it!!
-    console.log(this.peerConnection.signalingState);
   },
 
   createPeerConnection(offerObj) {

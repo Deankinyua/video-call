@@ -40,6 +40,10 @@ defmodule VideoCall.Calls do
   def send_answer_to_offerer(recipient_id, answer),
     do: send_message(recipient_id, {:answer_to_offer, answer})
 
+  @spec switch_caller_view(user_id()) :: :ok
+  def switch_caller_view(recipient_id),
+    do: send_message(recipient_id, :switch_view)
+
   defp send_message(recipient_id, message) do
     Phoenix.PubSub.broadcast(
       VideoCall.PubSub,

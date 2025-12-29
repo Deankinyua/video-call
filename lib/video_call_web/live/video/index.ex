@@ -7,6 +7,9 @@ defmodule VideoCallWeb.VideoLive.Index do
   alias VideoCallWeb.ContactComponent
   alias VideoCallWeb.VideoComponents
 
+  @larger_video_classes "w-full h-[78vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden"
+  @smaller_video_classes "min-w-[15rem] w-[48%] max-w-[20rem] h-[18vh] z-30 absolute bottom-[-0.8rem] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:bottom-0"
+
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
@@ -45,12 +48,10 @@ defmodule VideoCallWeb.VideoLive.Index do
         </section>
       </div>
 
-      <div class="h-[10rem] sm:h-[2rem]"></div>
-
-      <div>
-        <div id="videos" class="flex flex-col gap-2 relative border border-blue-400">
-          <VideoComponents.local_video />
-          <VideoComponents.remote_video />
+      <div class="py-10 px-4">
+        <div id="videos" class="relative">
+          <VideoComponents.local_video class={@local_video_class} />
+          <VideoComponents.remote_video class={@remote_video_class} />
         </div>
       </div>
 
@@ -69,7 +70,16 @@ defmodule VideoCallWeb.VideoLive.Index do
      socket
      |> assign(:caller, "")
      |> assign(:contacts, contacts)
-     |> assign(:show_call_notification, false)}
+     |> assign(
+       :local_video_class,
+       @larger_video_classes
+     )
+     |> assign(
+       :remote_video_class,
+       @smaller_video_classes
+     )
+     |> assign(:show_call_notification, false),
+     temporary_assigns: [local_video_class: "", remote_video_class: ""]}
   end
 
   @impl Phoenix.LiveView
@@ -96,8 +106,12 @@ defmodule VideoCallWeb.VideoLive.Index do
     answerer = user.id
     offer_obj = WebrtcServer.update_offer(caller_id, answerer)
 
+    Calls.switch_caller_view(offer_obj.offerer)
+
     {:noreply,
      socket
+     |> assign(:local_video_class, @smaller_video_classes)
+     |> assign(:remote_video_class, @larger_video_classes)
      |> assign(:show_call_notification, false)
      |> push_event("answer", %{offer_obj: offer_obj})}
   end
@@ -170,4 +184,14 @@ defmodule VideoCallWeb.VideoLive.Index do
         socket
       ),
       do: {:noreply, push_event(socket, "add_answer", %{answer: answer})}
+
+  def handle_info(
+        :switch_view,
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:local_video_class, @smaller_video_classes)
+     |> assign(:remote_video_class, @larger_video_classes)}
+  end
 end

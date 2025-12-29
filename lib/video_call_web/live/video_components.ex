@@ -80,33 +80,26 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :class, :string, required: true
+
   @spec local_video(assigns()) :: rendered()
   def local_video(assigns) do
     ~H"""
-    <div>
-      <video
-        class="z-30 w-[10rem] h-[13rem] object-cover border border-red-400 absolute bottom-[-3rem] right-[2rem] sm:w-[16rem]  sm:bottom-[1rem]"
-        id="local-video"
-        autoplay
-        playsinline
-        muted
-      >
+    <div class={@class}>
+      <video class="w-full h-full object-cover" id="local-video" autoplay playsinline muted>
         This browser does not support video
       </video>
     </div>
     """
   end
 
+  attr :class, :string, required: true
+
   @spec remote_video(assigns()) :: rendered()
   def remote_video(assigns) do
     ~H"""
-    <div>
-      <video
-        class="w-full h-[70vh] sm:h-[80vh] max-w-[30rem] mx-auto object-cover"
-        id="remote-video"
-        autoplay
-        playsinline
-      >
+    <div class={@class}>
+      <video class="w-full h-full object-cover" id="remote-video" autoplay playsinline>
         This browser does not support video
       </video>
     </div>
@@ -116,7 +109,7 @@ defmodule VideoCallWeb.VideoComponents do
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
-    <div class="absolute bottom-[3rem] left-[25%] bg-[#ffffff] rounded-lg px-4 py-2">
+    <div class="absolute bottom-[7vh] left-[25%] bg-[#ffffff] rounded-lg px-4 py-2 border border-green-400">
       <button phx-click={
         JS.toggle(to: "#contacts", in: "ease-out duration-300", out: "ease-in-out duration-300")
       }>
