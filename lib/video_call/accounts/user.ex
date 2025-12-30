@@ -14,7 +14,6 @@ defmodule VideoCall.Accounts.User do
   schema "users" do
     field :email, :string
     field :username, :string
-    field :current_password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :password, :string, virtual: true, redact: true
 
@@ -53,20 +52,6 @@ defmodule VideoCall.Accounts.User do
     |> unique_constraint(:username)
     |> validate_email(opts)
     |> validate_password(opts)
-  end
-
-  @doc """
-  Validates the current password otherwise adds an error to the changeset.
-  """
-  @spec validate_current_password(changeset(), password()) :: changeset()
-  def validate_current_password(changeset, password) do
-    changeset = cast(changeset, %{current_password: password}, [:current_password])
-
-    if valid_password?(changeset.data, password) do
-      changeset
-    else
-      add_error(changeset, :current_password, "is not valid")
-    end
   end
 
   @doc """
