@@ -22,7 +22,7 @@ defmodule VideoCallWeb.VideoLive.Index do
 
       <div
         id="contacts"
-        class="w-full h-screen px-2 contacts-shadow mx-auto absolute hidden bg-[#FFFFFF] z-50 sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:border-[0.5px] sm:border-[#CBCBCB] sm:rounded-xl sm:top-4 sm:right-4"
+        class="z-50 w-full h-screen px-2 contacts-shadow absolute bg-[#FFFFFF] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:border-[0.5px] sm:border-[#CBCBCB] sm:rounded-xl sm:top-4 sm:right-4"
       >
         <section class="w-[92%] mx-auto my-4 flex flex-col gap-4">
           <div
