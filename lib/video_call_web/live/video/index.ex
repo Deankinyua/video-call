@@ -7,8 +7,8 @@ defmodule VideoCallWeb.VideoLive.Index do
   alias VideoCallWeb.ContactComponent
   alias VideoCallWeb.VideoComponents
 
-  @larger_video_classes "w-full h-[78vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden"
-  @smaller_video_classes "min-w-[15rem] w-[48%] max-w-[20rem] h-[18vh] z-30 absolute bottom-[-0.8rem] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:bottom-0"
+  @larger_video_classes "w-full h-[72vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden"
+  @smaller_video_classes "w-[9rem] max-w-[20rem] h-[28vh] z-30 absolute bottom-[9vh] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:w-[40%] lg:w-[46%] sm:bottom-[12vh]"
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -22,7 +22,7 @@ defmodule VideoCallWeb.VideoLive.Index do
 
       <div
         id="contacts"
-        class="z-50 w-full h-screen px-2 contacts-shadow absolute bg-[#FFFFFF] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:border-[0.5px] sm:border-[#CBCBCB] sm:rounded-xl sm:top-4 sm:right-4"
+        class="z-50 w-full h-screen px-2 contacts-shadow absolute hidden bg-[#1E1F24] text-[#E6E8EC] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:rounded-xl sm:top-4 sm:right-4"
       >
         <section class="w-[92%] mx-auto my-4 flex flex-col gap-4">
           <div
@@ -34,10 +34,7 @@ defmodule VideoCallWeb.VideoLive.Index do
             <VideoComponents.close_contacts_button />
           </div>
           <div>
-            <div
-              :for={contact <- @contacts}
-              class="first:rounded-t-lg last:rounded-b-lg last:border-b border-x border-t border-[#CBCBCB]"
-            >
+            <div :for={contact <- @contacts}>
               <.live_component
                 contact={contact}
                 id={"contact-#{contact.id}"}
@@ -52,10 +49,9 @@ defmodule VideoCallWeb.VideoLive.Index do
         <div id="videos" class="relative">
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
+          <VideoComponents.controls />
         </div>
       </div>
-
-      <VideoComponents.controls />
     </div>
     """
   end

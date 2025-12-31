@@ -6,7 +6,7 @@ defmodule VideoCallWeb.ContactComponent do
   @impl Phoenix.LiveComponent
   def render(assigns) do
     ~H"""
-    <div class="flex justify-between items-center p-2">
+    <div class="bg-[#24262C] cursor-pointer rounded-xl mb-3 flex justify-between items-center p-2 hover:bg-[#2C2F36]">
       <section class="flex gap-4 items-center">
         <div class="shrink-0">
           <img
@@ -18,7 +18,7 @@ defmodule VideoCallWeb.ContactComponent do
         <div class="text-lg">{@contact.username}</div>
       </section>
       <button
-        class="w-11 h-11 rounded-full bg-[#34C759] flex items-center justify-center"
+        class="w-11 h-11 rounded-full bg-[#2ED760] flex items-center justify-center"
         phx-target={@myself}
         phx-click={
           JS.hide(to: "#contacts", transition: "ease-in-out duration-300") |> JS.push("call")
