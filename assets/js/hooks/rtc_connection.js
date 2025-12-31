@@ -113,6 +113,12 @@ RtcConnectionHooks.RtcConnection = {
   async addAnswer(answer) {
     //* set answer as remote description of the offerer
     await this.peerConnection.setRemoteDescription(answer);
+    // once the connection is stable, remove object from Signalling server
+
+    if (this.peerConnection.signalingState === "stable") {
+      this.pushEvent("clear_offer_object", {});
+    }
+
     // and that's about it!!
   },
 
@@ -131,11 +137,6 @@ RtcConnectionHooks.RtcConnection = {
         pc.addTrack(track, this.localStream);
       });
 
-      pc.addEventListener("signalingstatechange", (event) => {
-        console.log("The signalling state has changed to...");
-        console.log(pc.signalingState);
-      });
-
       // check if icecandidates were generated
       pc.addEventListener("icecandidate", (e) => {
         if (e.candidate) {
@@ -148,9 +149,7 @@ RtcConnectionHooks.RtcConnection = {
 
       // This will be called when tracks are added from the remote side
       pc.addEventListener("track", (e) => {
-        console.log("I guess this is how we get the tracks");
         e.streams[0].getTracks().forEach((track) => {
-          console.log(track);
           this.remoteStream.addTrack(track);
         });
       });
@@ -159,9 +158,8 @@ RtcConnectionHooks.RtcConnection = {
 
       if (offerObj) {
         // * This will set the remoteDescription of CLIENT2 as the offer
-        console.log("Setting remote description of the answerer...");
         await this.peerConnection.setRemoteDescription(offerObj.offer);
-        console.log(peerConnection.signalingState); //should be have-remote-offer, because client2 has setRemoteDesc on the offer
+        console.log(this.peerConnection.signalingState); //should be have-remote-offer, because answerer has setRemoteDesc on the offer
       }
       resolve();
     });

@@ -48,6 +48,11 @@ defmodule VideoCall.WebrtcServer do
     GenServer.cast(__MODULE__, {:add_answerer_candidate, ice_user_id, candidate})
   end
 
+  @spec clear_offer_object(offerer()) :: :ok
+  def clear_offer_object(offerer) do
+    GenServer.cast(__MODULE__, {:clear_offer_object, offerer})
+  end
+
   @impl GenServer
   def handle_call({:new_offer, offer_object}, _from, state) do
     offers = Map.put(state.offers, offer_object.offerer, offer_object)
@@ -114,6 +119,12 @@ defmodule VideoCall.WebrtcServer do
         state
       end
 
+    {:noreply, state}
+  end
+
+  def handle_cast({:clear_offer_object, offerer}, state) do
+    updated_offers = Map.delete(state.offers, offerer)
+    state = Map.put(state, :offers, updated_offers)
     {:noreply, state}
   end
 

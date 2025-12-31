@@ -138,6 +138,17 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_event(
+        "clear_offer_object",
+        _params,
+        socket
+      ) do
+    offer_id = socket.assigns.current_user.id
+    WebrtcServer.clear_offer_object(offer_id)
+
+    {:noreply, socket}
+  end
+
+  def handle_event(
         "set_remote_description_of_offerer",
         %{"answer" => answer, "offerer" => offerer},
         socket
