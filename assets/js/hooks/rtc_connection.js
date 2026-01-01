@@ -18,7 +18,7 @@ RtcConnectionHooks.RtcConnection = {
           urls: "stun:157.173.115.229:3478",
         },
         {
-          urls: "turn:157.173.115.229:3478?transport=tcp",
+          urls: "turn:157.173.115.229:3478",
           username: "dean",
           credential: "cobraKinyua",
         },
@@ -84,8 +84,7 @@ RtcConnectionHooks.RtcConnection = {
 
   async checkTurn() {
     let isOnline = await this.checkTURNServer(this.peerConfiguration);
-    console.log("Is the turn server online? ");
-    console.log(isOnline);
+    console.log("Is the turn server online? " + isOnline);
   },
 
   async createOffer() {
@@ -173,22 +172,12 @@ RtcConnectionHooks.RtcConnection = {
         pc.addTrack(track, this.localStream);
       });
 
-      pc.addEventListener("iceconnectionstatechange", () => {
-        console.log("ICE Connection State:", pc.iceConnectionState);
-      });
-
       pc.addEventListener("connectionstatechange", () => {
         console.log("Connection State:", pc.connectionState);
       });
 
-      pc.addEventListener("icecandidateerror", (e) => {
-        console.error("ICE Candidate Error:", e.errorCode, e.errorText, e.url);
-      });
-
       // check if icecandidates were generated
       pc.addEventListener("icecandidate", (e) => {
-        console.log("........Ice candidate found!......");
-        console.log(e.candidate);
         if (e.candidate) {
           this.pushEvent("send_ice_candidates_to_signalling_server", {
             did_i_offer: this.didIOffer,
