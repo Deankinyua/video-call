@@ -14,21 +14,19 @@ RtcConnectionHooks.RtcConnection = {
     // * The STUN servers
     this.peerConfiguration = {
       iceServers: [
-        // {
-        //   urls: [
-        //     "stun:stun.l.google.com:19302",
-        //     "stun:stun1.l.google.com:19302",
-        //   ],
-        // },
-        // {
-        //   urls: "turn:157.173.115.229",
-        //   username: "dean",
-        //   credential: "cobraKinyua",
-        // },
+        {
+          urls: "stun:157.173.115.229:3478",
+        },
+        {
+          urls: "turn:157.173.115.229:3478?transport=tcp",
+          username: "dean",
+          credential: "cobraKinyua",
+        },
       ],
     };
 
     this.init();
+    this.checkTurn();
 
     this.handleEvent("create_offer", () => {
       this.createOffer();
@@ -53,8 +51,41 @@ RtcConnectionHooks.RtcConnection = {
     });
   },
 
+  checkTURNServer(turnConfig, timeout = 5000) {
+    return new Promise(async (resolve, reject) => {
+      const pc = new RTCPeerConnection(turnConfig);
+      let promiseResolved = false;
+      // Stop waiting after X milliseconds and display the result
+      setTimeout(() => {
+        if (promiseResolved) return;
+        promiseResolved = true;
+        resolve(false);
+      }, timeout);
+      // Create a bogus data channel
+      pc.createDataChannel("");
+      // Listen for candidates
+      pc.onicecandidate = (ice) => {
+        if (promiseResolved || ice === null || ice.candidate === null) return;
+        console.log(ice.candidate.type);
+        if (ice.candidate.type === "relay") {
+          promiseResolved = true;
+          resolve(true);
+        }
+      };
+      // Create offer and set local description
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+    });
+  },
+
   async init() {
     await this.fetchUserMedia();
+  },
+
+  async checkTurn() {
+    let isOnline = await this.checkTURNServer(this.peerConfiguration);
+    console.log("Is the turn server online? ");
+    console.log(isOnline);
   },
 
   async createOffer() {
@@ -63,7 +94,7 @@ RtcConnectionHooks.RtcConnection = {
     try {
       const offer = await this.peerConnection.createOffer();
       // setLocalDescription is called so that the 2 peers eventually agree on a configuration
-      this.peerConnection.setLocalDescription(offer);
+      await this.peerConnection.setLocalDescription(offer);
       this.didIOffer = true;
       this.pushEvent("new_offer", { offer: offer }); //send offer to signalingServer
     } catch (err) {
@@ -120,9 +151,9 @@ RtcConnectionHooks.RtcConnection = {
     await this.peerConnection.setRemoteDescription(answer);
     // once the connection is stable, remove object from Signalling server
 
-    if (this.peerConnection.signalingState === "stable") {
-      this.pushEvent("clear_offer_object", {});
-    }
+    // if (this.peerConnection.signalingState === "stable") {
+    //   this.pushEvent("clear_offer_object", {});
+    // }
 
     // and that's about it!!
   },
@@ -142,8 +173,22 @@ RtcConnectionHooks.RtcConnection = {
         pc.addTrack(track, this.localStream);
       });
 
+      pc.addEventListener("iceconnectionstatechange", () => {
+        console.log("ICE Connection State:", pc.iceConnectionState);
+      });
+
+      pc.addEventListener("connectionstatechange", () => {
+        console.log("Connection State:", pc.connectionState);
+      });
+
+      pc.addEventListener("icecandidateerror", (e) => {
+        console.error("ICE Candidate Error:", e.errorCode, e.errorText, e.url);
+      });
+
       // check if icecandidates were generated
       pc.addEventListener("icecandidate", (e) => {
+        console.log("........Ice candidate found!......");
+        console.log(e.candidate);
         if (e.candidate) {
           this.pushEvent("send_ice_candidates_to_signalling_server", {
             did_i_offer: this.didIOffer,
