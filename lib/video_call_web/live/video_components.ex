@@ -31,7 +31,7 @@ defmodule VideoCallWeb.VideoComponents do
         <section class="flex flex-col gap-2 items-center">
           <button
             class="w-14 h-14 rounded-full bg-[#FF3B30] flex items-center justify-center"
-            phx-click={JS.push("decline")}
+            phx-click={JS.push("decline_call")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-6">
               <g transform="rotate(135 12 12)">
@@ -48,7 +48,7 @@ defmodule VideoCallWeb.VideoComponents do
         <section class="flex flex-col gap-2 items-center">
           <button
             class="w-14 h-14 rounded-full bg-[#34C759] flex items-center justify-center"
-            phx-click={JS.push("answer")}
+            phx-click={JS.push("answer_call")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-6">
               <path

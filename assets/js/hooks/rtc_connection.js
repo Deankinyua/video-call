@@ -26,6 +26,7 @@ RtcConnectionHooks.RtcConnection = {
     };
 
     this.init();
+
     this.checkTurn();
 
     this.handleEvent("create_offer", () => {
@@ -55,7 +56,8 @@ RtcConnectionHooks.RtcConnection = {
     return new Promise(async (resolve, reject) => {
       const pc = new RTCPeerConnection(turnConfig);
       let promiseResolved = false;
-      // Stop waiting after X milliseconds and display the result
+      // if no TURN relay candidate is found within the 5 seconds, assume the TURN server
+      // is not working and resolve with false
       setTimeout(() => {
         if (promiseResolved) return;
         promiseResolved = true;

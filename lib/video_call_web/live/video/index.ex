@@ -7,7 +7,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   alias VideoCallWeb.ContactComponent
   alias VideoCallWeb.VideoComponents
 
-  @larger_video_classes "w-full h-[72vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden"
+  @larger_video_classes "w-full h-[72vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden md:h-[80vh]"
   @smaller_video_classes "w-[9rem] max-w-[20rem] h-[28vh] z-30 absolute bottom-[9vh] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:w-[40%] lg:w-[46%] sm:bottom-[12vh]"
 
   @impl Phoenix.LiveView
@@ -95,7 +95,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_event(
-        "answer",
+        "answer_call",
         _params,
         %{assigns: %{caller_id: caller_id, current_user: user}} = socket
       ) do
