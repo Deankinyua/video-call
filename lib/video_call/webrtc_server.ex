@@ -11,6 +11,7 @@ defmodule VideoCall.WebrtcServer do
   @type candidate_type :: atom()
   @type ice_user_id :: Ecto.UUID.t()
   @type offer_obj :: map()
+  @type offer_obj_id :: String.t()
   @type offerer :: Ecto.UUID.t()
 
   @spec start_link(any()) :: GenServer.on_start()
@@ -28,14 +29,14 @@ defmodule VideoCall.WebrtcServer do
     GenServer.call(__MODULE__, {:new_offer, offer_object})
   end
 
-  @spec update_offer(offerer(), answerer()) :: offer_obj()
-  def update_offer(offerer, answerer) do
-    GenServer.call(__MODULE__, {:update_offer, offerer, answerer})
+  @spec update_offer(offer_obj_id(), answerer()) :: offer_obj()
+  def update_offer(offer_obj_id, answerer) do
+    GenServer.call(__MODULE__, {:update_offer, offer_obj_id, answerer})
   end
 
-  @spec get_candidates(offerer(), candidate_type()) :: list()
-  def get_candidates(offerer, candidate_type) do
-    GenServer.call(__MODULE__, {:get_candidates, offerer, candidate_type})
+  @spec get_candidates(offer_obj_id(), candidate_type()) :: list()
+  def get_candidates(offer_obj_id, candidate_type) do
+    GenServer.call(__MODULE__, {:get_candidates, offer_obj_id, candidate_type})
   end
 
   @spec add_offerer_candidate(ice_user_id(), any()) :: :ok
@@ -48,9 +49,9 @@ defmodule VideoCall.WebrtcServer do
     GenServer.cast(__MODULE__, {:add_answerer_candidate, ice_user_id, candidate})
   end
 
-  @spec clear_offer_object(offerer()) :: :ok
-  def clear_offer_object(offerer) do
-    GenServer.cast(__MODULE__, {:clear_offer_object, offerer})
+  @spec clear_offer_object(offer_obj_id()) :: :ok
+  def clear_offer_object(offer_obj_id) do
+    GenServer.cast(__MODULE__, {:clear_offer_object, offer_obj_id})
   end
 
   @impl GenServer
@@ -61,8 +62,8 @@ defmodule VideoCall.WebrtcServer do
     {:reply, :ok, state}
   end
 
-  def handle_call({:update_offer, offerer, answerer}, _from, state) do
-    offer_obj = state.offers[offerer]
+  def handle_call({:update_offer, offer_obj_id, answerer}, _from, state) do
+    offer_obj = state.offers[offer_obj_id]
 
     updated_offer_obj = Map.put(offer_obj, :answerer, answerer)
 
@@ -71,8 +72,8 @@ defmodule VideoCall.WebrtcServer do
     {:reply, updated_offer_obj, state}
   end
 
-  def handle_call({:get_candidates, offerer, candidate_type}, _from, state) do
-    offer_obj = state.offers[offerer]
+  def handle_call({:get_candidates, offer_obj_id, candidate_type}, _from, state) do
+    offer_obj = state.offers[offer_obj_id]
     candidates = Map.get(offer_obj, candidate_type)
 
     {:reply, candidates, state}
@@ -122,8 +123,8 @@ defmodule VideoCall.WebrtcServer do
     {:noreply, state}
   end
 
-  def handle_cast({:clear_offer_object, offerer}, state) do
-    updated_offers = Map.delete(state.offers, offerer)
+  def handle_cast({:clear_offer_object, offer_obj_id}, state) do
+    updated_offers = Map.delete(state.offers, offer_obj_id)
     state = Map.put(state, :offers, updated_offers)
     {:noreply, state}
   end

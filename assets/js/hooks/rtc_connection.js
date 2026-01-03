@@ -138,7 +138,7 @@ RtcConnectionHooks.RtcConnection = {
     await this.peerConnection.setLocalDescription(answer);
 
     this.pushEvent("add_offerer_ice_candidates_to_answerer", {
-      offerer: offerObj.offerer,
+      offer_obj_id: offerObj.offerer,
     });
 
     this.pushEvent("set_remote_description_of_offerer", {

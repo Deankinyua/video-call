@@ -128,10 +128,10 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   def handle_event(
         "add_offerer_ice_candidates_to_answerer",
-        %{"offerer" => offerer},
+        %{"offer_obj_id" => offer_obj_id},
         socket
       ) do
-    offerer_ice_candidates = WebrtcServer.get_candidates(offerer, :offerer_ice_candidates)
+    offerer_ice_candidates = WebrtcServer.get_candidates(offer_obj_id, :offerer_ice_candidates)
 
     {:noreply,
      push_event(socket, "offerer_ice_candidates", %{candidates: offerer_ice_candidates})}
