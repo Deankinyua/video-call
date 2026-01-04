@@ -50,6 +50,10 @@ defmodule VideoCallWeb.VideoLive.Index do
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
           <VideoComponents.controls />
+          <VideoComponents.call_declined_notification
+            show?={@show_call_declined_notification}
+            callee={@callee}
+          />
         </div>
       </div>
     </div>
@@ -65,6 +69,7 @@ defmodule VideoCallWeb.VideoLive.Index do
     {:ok,
      socket
      |> assign(:caller, "")
+     |> assign(:callee, "")
      |> assign(:contacts, contacts)
      |> assign(
        :local_video_class,
@@ -74,6 +79,7 @@ defmodule VideoCallWeb.VideoLive.Index do
        :remote_video_class,
        @smaller_video_classes
      )
+     |> assign(:show_call_declined_notification, false)
      |> assign(:show_call_notification, false),
      temporary_assigns: [local_video_class: "", remote_video_class: ""]}
   end
@@ -110,6 +116,18 @@ defmodule VideoCallWeb.VideoLive.Index do
      |> assign(:remote_video_class, @larger_video_classes)
      |> assign(:show_call_notification, false)
      |> push_event("answer", %{offer_obj: offer_obj})}
+  end
+
+  def handle_event(
+        "decline_call",
+        _params,
+        %{assigns: %{caller_id: caller_id, current_user: user}} = socket
+      ) do
+    Calls.send_decline_call_notification(caller_id, user.username)
+
+    {:noreply,
+     socket
+     |> assign(:show_call_notification, false)}
   end
 
   def handle_event(
@@ -191,6 +209,16 @@ defmodule VideoCallWeb.VideoLive.Index do
         socket
       ),
       do: {:noreply, push_event(socket, "add_answer", %{answer: answer})}
+
+  def handle_info(
+        {:call_declined, callee_username},
+        socket
+      ),
+      do:
+        {:noreply,
+         socket
+         |> assign(:callee, callee_username)
+         |> assign(:show_call_declined_notification, true)}
 
   def handle_info(
         :switch_view,

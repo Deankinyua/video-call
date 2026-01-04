@@ -82,6 +82,25 @@ defmodule VideoCall.Calls do
     do: send_message(recipient_id, {:answer_to_offer, answer})
 
   @doc """
+  Notifies a person that their call has been declined.
+
+  ## Parameters
+
+    * `recipient_id` - The id of the call initiator
+    * `callee_username` - The username of the person who was called
+
+  ## Examples
+
+      iex> send_decline_call_notification("550e8400-e29b-41d4-a716-446655440000", "john_doe")
+      :ok
+
+  """
+
+  @spec send_decline_call_notification(user_id(), username()) :: :ok
+  def send_decline_call_notification(recipient_id, callee_username),
+    do: send_message(recipient_id, {:call_declined, callee_username})
+
+  @doc """
   Notifies a user to switch their call view state.
 
   Broadcasts a `:switch_view` message to trigger a UI state change,

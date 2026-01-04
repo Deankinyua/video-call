@@ -65,6 +65,39 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :show?, :boolean, required: true
+  attr :callee, :string, required: true
+
+  @spec call_declined_notification(assigns()) :: rendered()
+  def call_declined_notification(assigns) do
+    ~H"""
+    <div
+      :if={@show?}
+      class="animate-pulse absolute top-[6%] text-[#ffffff] rounded-xl w-[20rem] flex gap-3 py-2 px-3 bg-[#1E1F24] sm:right-[30%]"
+    >
+      <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
+          <path
+            d="M6 6L18 18M18 6L6 18"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </section>
+      <section class="flex-1 flex flex-col gap-2">
+        <p>{@callee} declined your call.</p>
+        <section class="flex justify-between">
+          <p class="text-[#9AA0B8]">Your call was declined.</p>
+          <div class="bg-[#1E6FD9] px-4 rounded text-sm flex items-center">OK</div>
+        </section>
+      </section>
+    </div>
+    """
+  end
+
   @spec close_contacts_button(assigns()) :: rendered()
   def close_contacts_button(assigns) do
     ~H"""
