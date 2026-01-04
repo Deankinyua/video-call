@@ -14,7 +14,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      class="z-[1000] w-[60%] flex flex-col gap-2 items-center mt-2 absolute top-0 left-[20%] mx-auto rounded-lg text-[#FFFFFF]"
+      class="z-[1000] w-[60%] flex flex-col gap-2 items-center mt-2 absolute top-[3rem] left-[20%] mx-auto rounded-lg text-[#FFFFFF]"
     >
       <div class="flex flex-col gap-2 items-center">
         <section>
