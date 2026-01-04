@@ -50,12 +50,13 @@ defmodule VideoCallWeb.VideoLive.Index do
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
           <VideoComponents.controls />
-          <VideoComponents.call_declined_notification
-            show?={@show_call_declined_notification}
-            callee={@callee}
-          />
         </div>
       </div>
+
+      <VideoComponents.call_declined_notification
+        show?={@show_call_declined_notification}
+        callee={@callee}
+      />
     </div>
     """
   end
@@ -125,9 +126,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     Calls.send_decline_call_notification(caller_id, user.username)
 
-    {:noreply,
-     socket
-     |> assign(:show_call_notification, false)}
+    {:noreply, assign(socket, :show_call_notification, false)}
   end
 
   def handle_event(

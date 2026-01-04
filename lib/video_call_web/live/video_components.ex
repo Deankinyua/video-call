@@ -73,7 +73,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      class="animate-pulse absolute top-[6%] text-[#ffffff] rounded-xl w-[20rem] flex gap-3 py-2 px-3 bg-[#1E1F24] sm:right-[30%]"
+      class="text-[#ffffff] rounded-xl w-[20rem] flex gap-3 py-2 px-3 bg-[#1E1F24] absolute top-[2rem] right-4 md:top-4 md:animate-pulse"
     >
       <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
