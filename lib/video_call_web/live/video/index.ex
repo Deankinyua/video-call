@@ -36,7 +36,7 @@ defmodule VideoCallWeb.VideoLive.Index do
           <div>
             <div :for={contact <- @contacts}>
               <.live_component
-                contact={contact}
+                username={contact.username}
                 id={"contact-#{contact.id}"}
                 module={ContactComponent}
               />
@@ -69,7 +69,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   def mount(_params, _session, socket) do
     contacts = Accounts.list_users()
 
-    if connected?(socket), do: Calls.subscribe(socket.assigns.current_user.id)
+    if connected?(socket), do: Calls.subscribe(socket.assigns.current_user.username)
 
     {:ok,
      socket
@@ -94,7 +94,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   @impl Phoenix.LiveView
   def handle_event("new_offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
     offer_object = %{
-      offerer: user.id,
+      offerer: user.username,
       offer: offer,
       offerer_ice_candidates: [],
       answerer: nil,
@@ -112,7 +112,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         _params,
         %{assigns: %{caller_id: caller_id, current_user: user}} = socket
       ) do
-    answerer = user.id
+    answerer = user.username
     offer_obj = WebrtcServer.update_offer(caller_id, answerer)
 
     Calls.switch_caller_view(offer_obj.offerer, :remote_large)
@@ -129,9 +129,9 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "decline_call",
         _params,
-        %{assigns: %{caller_id: caller_id, current_user: user}} = socket
+        %{assigns: %{caller_id: caller, current_user: user}} = socket
       ) do
-    Calls.send_decline_call_notification(caller_id, user.username)
+    Calls.send_decline_call_notification(caller, user.username)
 
     {:noreply, assign(socket, :show_call_notification, false)}
   end
@@ -141,7 +141,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         %{"did_i_offer" => from_offerer?, "ice_candidate" => candidate},
         %{assigns: %{current_user: user}} = socket
       ) do
-    ice_user_id = user.id
+    ice_user_id = user.username
 
     if from_offerer?,
       do: WebrtcServer.add_offerer_candidate(ice_user_id, candidate),
@@ -166,7 +166,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         _params,
         socket
       ) do
-    offer_id = socket.assigns.current_user.id
+    offer_id = socket.assigns.current_user.username
     WebrtcServer.clear_offer_object(offer_id)
 
     {:noreply, socket}
@@ -203,26 +203,25 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   @impl Phoenix.LiveView
   def handle_info(
-        {:notify_recipient, recipient_id},
+        {:notify_recipient_of_incoming_call, recipient},
         %{assigns: %{current_user: user}} = socket
       ) do
-    Calls.call(recipient_id, user.username, user.id)
+    Calls.call(recipient, user.username)
 
     {:noreply,
      socket
-     |> assign(:callee_id, recipient_id)
+     |> assign(:callee_id, recipient)
      |> assign(:caller_id, nil)
      |> push_event("create_offer", %{})}
   end
 
   def handle_info(
-        {:new_call, caller_username, caller_id},
+        {:incoming_call, caller},
         socket
       ) do
     {:noreply,
      socket
-     |> assign(:caller, caller_username)
-     |> assign(:caller_id, caller_id)
+     |> assign(:caller, caller)
      |> assign(:show_call_notification, true)}
   end
 
@@ -268,15 +267,9 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     other_peer_username =
       if caller do
-        # get caller
-        peer_2 = Accounts.get_user!(caller)
-
-        peer_2.username
+        caller
       else
-        callee = Map.get(socket.assigns, :callee_id)
-        peer_2 = Accounts.get_user!(callee)
-
-        peer_2.username
+        Map.get(socket.assigns, :callee_id)
       end
 
     {:noreply,
