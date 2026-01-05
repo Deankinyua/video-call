@@ -50,6 +50,11 @@ RtcConnectionHooks.RtcConnection = {
     this.handleEvent("add_answer", ({ answer }) => {
       this.addAnswer(answer);
     });
+
+    this.handleEvent("end_call", () => {
+      this.peerConnection.close();
+      this.remoteVideoEl.srcObject = new MediaStream();
+    });
   },
 
   checkTURNServer(turnConfig, timeout = 5000) {

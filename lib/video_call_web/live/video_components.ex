@@ -76,7 +76,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <button
       class="w-12 h-10 rounded-3xl flex items-center justify-center bg-[#FF3B30]"
-      phx-click={JS.push("decline_call")}
+      phx-click={JS.push("end_call")}
     >
       <svg
         fill="#ffffff"
@@ -86,9 +86,9 @@ defmodule VideoCallWeb.VideoComponents do
         xmlns="http://www.w3.org/2000/svg"
         stroke="#ffffff"
       >
-        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-        <g id="SVGRepo_iconCarrier">
+        <g id="SVGRepo_bgCarrier-1" stroke-width="0"></g>
+        <g id="SVGRepo_tracerCarrier-1" stroke-linecap="round" stroke-linejoin="round"></g>
+        <g id="SVGRepo_iconCarrier-1">
           <path d="M 28.0235 17.6055 C 17.8751 17.6055 8.3361 19.7383 3.5783 24.4961 C 1.4454 26.6524 .3439 29.2539 .4845 32.3945 C .5782 34.2929 1.1642 35.9805 2.2657 37.0820 C 3.1095 37.9258 4.2345 38.3945 5.5704 38.1836 L 14.2657 36.7070 C 15.5783 36.4961 16.4923 36.0976 17.0783 35.4883 C 17.8517 34.7383 18.0861 33.6133 18.0861 32.1367 L 18.1095 29.7695 C 18.1095 29.3945 18.2735 29.1133 18.4845 28.8789 C 18.7188 28.5976 19.0704 28.4805 19.3283 28.4102 C 20.9220 28.0351 24.1798 27.6836 28.0235 27.6836 C 31.8908 27.6836 35.1251 27.9648 36.7188 28.4336 C 36.9532 28.5039 37.2814 28.6445 37.5392 28.8789 C 37.7735 29.1133 37.9142 29.3711 37.9142 29.7461 L 37.9376 32.1367 C 37.9610 33.6133 38.1954 34.7383 38.9454 35.4883 C 39.5548 36.0976 40.4688 36.4961 41.7814 36.7070 L 50.3593 38.1602 C 51.7422 38.3945 52.9144 37.9024 53.8283 37.0117 C 54.9299 35.9336 55.5390 34.2695 55.5861 32.3711 C 55.6561 29.2070 54.4609 26.6055 52.3518 24.4961 C 47.5705 19.7383 38.1720 17.6055 28.0235 17.6055 Z">
           </path>
         </g>
@@ -132,6 +132,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
+      id="call-declined-notification"
       class="text-[#ffffff] rounded-xl w-[20rem] flex gap-3 py-2 px-3 bg-[#1E1F24] absolute top-[2rem] right-4 md:top-4 md:animate-pulse"
     >
       <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
@@ -150,7 +151,14 @@ defmodule VideoCallWeb.VideoComponents do
         <p>{@callee} declined your call.</p>
         <section class="flex justify-between">
           <p class="text-[#9AA0B8]">Your call was declined.</p>
-          <div class="bg-[#1E6FD9] px-4 rounded text-sm flex items-center">OK</div>
+          <button
+            phx-click={
+              JS.hide(to: "#call-declined-notification", transition: "fade-out-scale duration-300")
+            }
+            class="bg-[#1E6FD9] px-4 rounded text-sm flex items-center"
+          >
+            OK
+          </button>
         </section>
       </section>
     </div>
@@ -204,6 +212,38 @@ defmodule VideoCallWeb.VideoComponents do
     <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-10 py-3 flex gap-4">
       <.show_contacts_button />
       <.end_call_button />
+    </div>
+    """
+  end
+
+  attr :message, :string, required: true
+  attr :show, :boolean, required: true
+
+  @spec toast(assigns()) :: rendered()
+  def toast(assigns) do
+    ~H"""
+    <div
+      :if={@show}
+      id="toast"
+      class="fixed bottom-[15vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+    >
+      <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
+        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            class="w-4 h-4"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM9 9a.75.75 0 0 0 0 1.5h.253a.25.25 0 0 1 .244.304l-.459 2.066A1.75 1.75 0 0 0 10.747 15H11a.75.75 0 0 0 0-1.5h-.253a.25.25 0 0 1-.244-.304l.459-2.066A1.75 1.75 0 0 0 9.253 9H9Z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </span>
+        <p class="text-sm font-medium">{@message}</p>
+      </div>
     </div>
     """
   end

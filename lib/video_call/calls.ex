@@ -3,6 +3,7 @@ defmodule VideoCall.Calls do
   Responsible for channeling calls and sending ice candidates.
   """
   @type caller_id :: Ecto.UUID.t()
+  @type larger_stream :: atom()
   @type user_id :: Ecto.UUID.t()
   @type username :: String.t()
 
@@ -117,9 +118,12 @@ defmodule VideoCall.Calls do
       :ok
 
   """
-  @spec switch_caller_view(user_id()) :: :ok
-  def switch_caller_view(recipient_id),
-    do: send_message(recipient_id, :switch_view)
+  @spec switch_caller_view(user_id(), larger_stream()) :: :ok
+  def switch_caller_view(recipient_id, :remote_large),
+    do: send_message(recipient_id, :switch_remote_stream_to_large)
+
+  def switch_caller_view(recipient_id, :local_large),
+    do: send_message(recipient_id, :switch_local_stream_to_large)
 
   defp send_message(recipient_id, message) do
     Phoenix.PubSub.broadcast(
