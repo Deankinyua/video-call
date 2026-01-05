@@ -18,7 +18,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       class="h-screen relative bg-black overflow-y-hidden"
       phx-hook="RtcConnection"
     >
-      <VideoComponents.call_notification show?={@show_call_notification} caller={@caller} />
+      <VideoComponents.call_notification show?={@show_incoming_call_notification} caller={@caller} />
 
       <div
         id="contacts"
@@ -58,8 +58,8 @@ defmodule VideoCallWeb.VideoLive.Index do
         callee={@callee}
       />
       <VideoComponents.toast
-        show={@show_call_ended_message}
-        message={"#{@call_ender_name} ended the call"}
+        show?={@show_call_termination_message}
+        message={"#{@call_terminator} ended the call"}
       />
     </div>
     """
@@ -73,9 +73,9 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:ok,
      socket
-     |> assign(:call_ender_name, "")
-     |> assign(:caller, "")
+     |> assign(:call_terminator, "")
      |> assign(:callee, "")
+     |> assign(:caller, "")
      |> assign(:contacts, contacts)
      |> assign(
        :local_video_class,
@@ -86,8 +86,8 @@ defmodule VideoCallWeb.VideoLive.Index do
        @smaller_video_classes
      )
      |> assign(:show_call_declined_notification, false)
-     |> assign(:show_call_ended_message, false)
-     |> assign(:show_call_notification, false),
+     |> assign(:show_call_termination_message, false)
+     |> assign(:show_incoming_call_notification, false),
      temporary_assigns: [local_video_class: "", remote_video_class: ""]}
   end
 
@@ -108,32 +108,29 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_event(
-        "answer_call",
+        "accept_call",
         _params,
-        %{assigns: %{caller_id: caller_id, current_user: user}} = socket
+        %{assigns: %{caller: caller, current_user: user}} = socket
       ) do
     answerer = user.username
-    offer_obj = WebrtcServer.update_offer(caller_id, answerer)
-
-    Calls.switch_caller_view(offer_obj.offerer, :remote_large)
+    offer_obj = WebrtcServer.update_offer(caller, answerer)
+    Calls.switch_view(caller)
 
     {:noreply,
      socket
-     |> assign(:callee_id, nil)
      |> assign(:local_video_class, @smaller_video_classes)
      |> assign(:remote_video_class, @larger_video_classes)
-     |> assign(:show_call_notification, false)
+     |> assign(:show_incoming_call_notification, false)
      |> push_event("answer", %{offer_obj: offer_obj})}
   end
 
   def handle_event(
         "decline_call",
         _params,
-        %{assigns: %{caller_id: caller, current_user: user}} = socket
+        %{assigns: %{caller: caller, current_user: user}} = socket
       ) do
     Calls.send_decline_call_notification(caller, user.username)
-
-    {:noreply, assign(socket, :show_call_notification, false)}
+    {:noreply, assign(socket, :show_incoming_call_notification, false)}
   end
 
   def handle_event(
@@ -177,12 +174,13 @@ defmodule VideoCallWeb.VideoLive.Index do
         _params,
         socket
       ) do
-    caller = Map.get(socket.assigns, :caller_id)
-    callee = Map.get(socket.assigns, :callee_id)
+    call_terminator = socket.assigns.current_user.username
+    caller = Map.get(socket.assigns, :caller)
+    callee = Map.get(socket.assigns, :callee)
 
     if caller,
-      do: Calls.switch_caller_view(caller, :local_large),
-      else: Calls.switch_caller_view(callee, :local_large)
+      do: Calls.notifiy_remote_peer_of_call_termination(caller, call_terminator),
+      else: Calls.notifiy_remote_peer_of_call_termination(callee, call_terminator)
 
     {:noreply,
      socket
@@ -210,8 +208,8 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:noreply,
      socket
-     |> assign(:callee_id, recipient)
-     |> assign(:caller_id, nil)
+     |> assign(:callee, recipient)
+     |> assign(:caller, nil)
      |> push_event("create_offer", %{})}
   end
 
@@ -221,8 +219,9 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     {:noreply,
      socket
+     |> assign(:callee, nil)
      |> assign(:caller, caller)
-     |> assign(:show_call_notification, true)}
+     |> assign(:show_incoming_call_notification, true)}
   end
 
   def handle_info(
@@ -260,24 +259,15 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_info(
-        :switch_local_stream_to_large,
+        {:call_terminated_by_other_peer, call_terminator},
         socket
       ) do
-    caller = Map.get(socket.assigns, :caller_id)
-
-    other_peer_username =
-      if caller do
-        caller
-      else
-        Map.get(socket.assigns, :callee_id)
-      end
-
     {:noreply,
      socket
-     |> assign(:call_ender_name, other_peer_username)
+     |> assign(:call_terminator, call_terminator)
      |> assign(:local_video_class, @larger_video_classes)
      |> assign(:remote_video_class, @smaller_video_classes)
-     |> assign(:show_call_ended_message, true)
+     |> assign(:show_call_termination_message, true)
      |> push_event("end_call", %{})}
   end
 end

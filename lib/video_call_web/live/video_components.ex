@@ -54,7 +54,7 @@ defmodule VideoCallWeb.VideoComponents do
         <section class="flex flex-col gap-2 items-center">
           <button
             class="w-14 h-14 rounded-full bg-[#34C759] flex items-center justify-center"
-            phx-click={JS.push("answer_call")}
+            phx-click={JS.push("accept_call")}
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-6">
               <path
@@ -207,13 +207,13 @@ defmodule VideoCallWeb.VideoComponents do
   end
 
   attr :message, :string, required: true
-  attr :show, :boolean, required: true
+  attr :show?, :boolean, required: true
 
   @spec toast(assigns()) :: rendered()
   def toast(assigns) do
     ~H"""
     <div
-      :if={@show}
+      :if={@show?}
       id="toast"
       class="fixed bottom-[15vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
     >

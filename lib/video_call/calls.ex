@@ -3,9 +3,6 @@ defmodule VideoCall.Calls do
   Responsible for channeling calls and sending ice candidates.
   """
 
-  @type caller_id :: Ecto.UUID.t()
-  @type larger_stream :: atom()
-  @type user_id :: Ecto.UUID.t()
   @type username :: String.t()
 
   @doc """
@@ -102,28 +99,40 @@ defmodule VideoCall.Calls do
     do: send_message(caller, {:call_declined, callee})
 
   @doc """
-  Notifies a user to switch their call view state.
-
-  Broadcasts a `:switch_view` message to trigger a UI state change,
-  typically used when the call is answered and both parties should
-  transition from the calling/ringing state to the active call view.
+  Once the connection has been established, the remote stream will start to flow to the user.
+  Use this function to switch so that the remote video becomes the bigger one.
 
   ## Parameters
 
-    * `recipient` - The id of the user who should switch their view
+    * `recipient` - The call initiator
 
   ## Examples
 
-      iex> switch_caller_view("550e8400-e29b-41d4-a716-446655440000")
+      iex> switch_view("john")
       :ok
 
   """
-  @spec switch_caller_view(user_id(), larger_stream()) :: :ok
-  def switch_caller_view(recipient, :remote_large),
+  @spec switch_view(username()) :: :ok
+  def switch_view(recipient),
     do: send_message(recipient, :switch_remote_stream_to_large)
 
-  def switch_caller_view(recipient, :local_large),
-    do: send_message(recipient, :switch_local_stream_to_large)
+  @doc """
+  Use this function to notify the remote peer after terminating a call.
+  ## Parameters
+
+    * `recipient` - The user to be notified of call termination.
+    * `call_terminator` - The user who ended the call.
+
+  ## Examples
+
+      iex> notifiy_remote_peer_of_call_termination("john", "rahab")
+      :ok
+
+  """
+
+  @spec notifiy_remote_peer_of_call_termination(username(), username()) :: :ok
+  def notifiy_remote_peer_of_call_termination(recipient, call_terminator),
+    do: send_message(recipient, {:call_terminated_by_other_peer, call_terminator})
 
   defp send_message(recipient, message) do
     Phoenix.PubSub.broadcast(
