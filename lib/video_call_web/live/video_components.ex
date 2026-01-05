@@ -124,47 +124,6 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
-  attr :show?, :boolean, required: true
-  attr :callee, :string, required: true
-
-  @spec call_declined_notification(assigns()) :: rendered()
-  def call_declined_notification(assigns) do
-    ~H"""
-    <div
-      :if={@show?}
-      id="call-declined-notification"
-      class="text-[#ffffff] rounded-xl w-[20rem] flex gap-3 py-2 px-3 bg-[#1E1F24] absolute top-[2rem] right-4 md:top-4 md:animate-pulse"
-    >
-      <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
-          <path
-            d="M6 6L18 18M18 6L6 18"
-            fill="none"
-            stroke="#FFFFFF"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-      </section>
-      <section class="flex-1 flex flex-col gap-2">
-        <p>{@callee} declined your call.</p>
-        <section class="flex justify-between">
-          <p class="text-[#9AA0B8]">Your call was declined.</p>
-          <button
-            phx-click={
-              JS.hide(to: "#call-declined-notification", transition: "fade-out-scale duration-300")
-            }
-            class="bg-[#1E6FD9] px-4 rounded text-sm flex items-center"
-          >
-            OK
-          </button>
-        </section>
-      </section>
-    </div>
-    """
-  end
-
   @spec close_contacts_button(assigns()) :: rendered()
   def close_contacts_button(assigns) do
     ~H"""
@@ -212,6 +171,37 @@ defmodule VideoCallWeb.VideoComponents do
     <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-10 py-3 flex gap-4">
       <.show_contacts_button />
       <.end_call_button />
+    </div>
+    """
+  end
+
+  attr :show?, :boolean, required: true
+  attr :callee, :string, required: true
+
+  @spec call_declined_notification(assigns()) :: rendered()
+  def call_declined_notification(assigns) do
+    ~H"""
+    <div
+      :if={@show?}
+      id="toast"
+      class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+    >
+      <div class="min-w-[14rem] flex items-center gap-3 px-2 py-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
+        <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
+            <path
+              d="M6 6L18 18M18 6L6 18"
+              fill="none"
+              stroke="#FFFFFF"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </section>
+
+        <div class="text-sm font-medium">{@callee} declined your call.</div>
+      </div>
     </div>
     """
   end
