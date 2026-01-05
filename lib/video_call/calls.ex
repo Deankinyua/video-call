@@ -1,6 +1,6 @@
 defmodule VideoCall.Calls do
   @moduledoc """
-  Responsible for channeling calls and sending ice candidates.
+  Responsible for channeling calls, sending ice candidates and configuring streams.
   """
 
   @type username :: String.t()
@@ -99,22 +99,23 @@ defmodule VideoCall.Calls do
     do: send_message(caller, {:call_declined, callee})
 
   @doc """
-  Once the connection has been established, the remote stream will start to flow to the user.
-  Use this function to switch so that the remote video becomes the bigger one.
+  This notifies the call initiator that their call was accepted.
+  The call initiator will update the size of their video streams and the 'callee' value
 
   ## Parameters
 
     * `recipient` - The call initiator
+    * `call_acceptor` - The user who accepted the call
 
   ## Examples
 
-      iex> switch_view("john")
+      iex> notify_remote_peer_of_call_acceptance("john", "rahab")
       :ok
 
   """
-  @spec switch_view(username()) :: :ok
-  def switch_view(recipient),
-    do: send_message(recipient, :switch_remote_stream_to_large)
+  @spec notify_remote_peer_of_call_acceptance(username(), username()) :: :ok
+  def notify_remote_peer_of_call_acceptance(recipient, call_acceptor),
+    do: send_message(recipient, {:call_accepted_by_other_peer, call_acceptor})
 
   @doc """
   Use this function to notify the remote peer after terminating a call.

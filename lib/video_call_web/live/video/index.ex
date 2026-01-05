@@ -114,7 +114,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     answerer = user.username
     offer_obj = WebrtcServer.update_offer(caller, answerer)
-    Calls.switch_view(caller)
+    Calls.notify_remote_peer_of_call_acceptance(caller, answerer)
 
     {:noreply,
      socket
@@ -130,7 +130,11 @@ defmodule VideoCallWeb.VideoLive.Index do
         %{assigns: %{caller: caller, current_user: user}} = socket
       ) do
     Calls.send_decline_call_notification(caller, user.username)
-    {:noreply, assign(socket, :show_incoming_call_notification, false)}
+
+    {:noreply,
+     socket
+     |> assign(:caller, nil)
+     |> assign(:show_incoming_call_notification, false)}
   end
 
   def handle_event(
@@ -208,7 +212,6 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:noreply,
      socket
-     |> assign(:callee, recipient)
      |> assign(:caller, nil)
      |> push_event("create_offer", %{})}
   end
@@ -219,7 +222,6 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     {:noreply,
      socket
-     |> assign(:callee, nil)
      |> assign(:caller, caller)
      |> assign(:show_incoming_call_notification, true)}
   end
@@ -249,11 +251,12 @@ defmodule VideoCallWeb.VideoLive.Index do
          |> assign(:show_call_declined_notification, true)}
 
   def handle_info(
-        :switch_remote_stream_to_large,
+        {:call_accepted_by_other_peer, call_acceptor},
         socket
       ) do
     {:noreply,
      socket
+     |> assign(:callee, call_acceptor)
      |> assign(:local_video_class, @smaller_video_classes)
      |> assign(:remote_video_class, @larger_video_classes)}
   end
