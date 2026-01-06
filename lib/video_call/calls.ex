@@ -131,8 +131,8 @@ defmodule VideoCall.Calls do
 
   """
 
-  @spec notifiy_remote_peer_of_call_termination(username(), username()) :: :ok
-  def notifiy_remote_peer_of_call_termination(recipient, call_terminator),
+  @spec notify_remote_peer_of_call_termination(username(), username()) :: :ok
+  def notify_remote_peer_of_call_termination(recipient, call_terminator),
     do: send_message(recipient, {:call_terminated_by_other_peer, call_terminator})
 
   defp send_message(recipient, message) do
