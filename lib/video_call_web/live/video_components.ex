@@ -183,10 +183,11 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      id="toast"
+      id="declined-call-notification"
       class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+      phx-hook="Animation"
     >
-      <div class="min-w-[14rem] flex items-center gap-3 px-2 py-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
+      <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
         <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
             <path
@@ -209,15 +210,16 @@ defmodule VideoCallWeb.VideoComponents do
   attr :message, :string, required: true
   attr :show?, :boolean, required: true
 
-  @spec toast(assigns()) :: rendered()
-  def toast(assigns) do
+  @spec call_termination_notification(assigns()) :: rendered()
+  def call_termination_notification(assigns) do
     ~H"""
     <div
       :if={@show?}
       id="toast"
       class="fixed bottom-[15vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+      phx-hook="Animation"
     >
-      <div class="flex items-center gap-3 px-5 py-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
+      <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
         <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
           <svg
             xmlns="http://www.w3.org/2000/svg"

@@ -57,7 +57,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         show?={@show_call_declined_notification}
         callee={@peer_2}
       />
-      <VideoComponents.toast
+      <VideoComponents.call_termination_notification
         show?={@show_call_termination_message}
         message={"#{@call_terminator} ended the call"}
       />
@@ -89,9 +89,7 @@ defmodule VideoCallWeb.VideoLive.Index do
      |> assign(:show_incoming_call_notification, false),
      temporary_assigns: [
        local_video_class: "",
-       remote_video_class: "",
-       show_call_declined_notification: false,
-       show_call_termination_message: false
+       remote_video_class: ""
      ]}
   end
 
@@ -199,6 +197,14 @@ defmodule VideoCallWeb.VideoLive.Index do
     Calls.send_answer_to_offerer(offerer, answer)
 
     {:noreply, socket}
+  end
+
+  def handle_event("animation-finished", %{"target" => "toast"}, socket) do
+    {:noreply, assign(socket, :show_call_termination_message, false)}
+  end
+
+  def handle_event("animation-finished", _params, socket) do
+    {:noreply, assign(socket, :show_call_declined_notification, false)}
   end
 
   @impl Phoenix.LiveView

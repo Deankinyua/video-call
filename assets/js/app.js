@@ -21,9 +21,12 @@ import "phoenix_html";
 import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
+
+import AnimationHooks from "./hooks/animation";
 import RtcConnectionHooks from "./hooks/rtc_connection";
 
 let Hooks = {
+  ...AnimationHooks,
   ...RtcConnectionHooks,
 };
 
