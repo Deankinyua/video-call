@@ -186,7 +186,7 @@ RtcConnectionHooks.RtcConnection = {
       // check if icecandidates were generated
       pc.addEventListener("icecandidate", (e) => {
         if (e.candidate) {
-          this.pushEvent("send_ice_candidates_to_signalling_server", {
+          this.pushEvent("send_ice_candidate_to_signalling_server", {
             did_i_offer: this.didIOffer,
             ice_candidate: e.candidate,
           });

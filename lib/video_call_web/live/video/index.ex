@@ -133,11 +133,14 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     Calls.send_decline_call_notification(caller, user.username)
 
-    {:noreply, assign(socket, :show_incoming_call_notification, false)}
+    {:noreply,
+     socket
+     |> assign(:peer_2, nil)
+     |> assign(:show_incoming_call_notification, false)}
   end
 
   def handle_event(
-        "send_ice_candidates_to_signalling_server",
+        "send_ice_candidate_to_signalling_server",
         %{"did_i_offer" => from_offerer?, "ice_candidate" => candidate},
         %{assigns: %{current_user: user}} = socket
       ) do
@@ -180,10 +183,11 @@ defmodule VideoCallWeb.VideoLive.Index do
     call_terminator = socket.assigns.current_user.username
     peer_2 = socket.assigns.peer_2
 
-    Calls.notify_remote_peer_of_call_termination(peer_2, call_terminator)
+    if peer_2, do: Calls.notify_remote_peer_of_call_termination(peer_2, call_terminator)
 
     {:noreply,
      socket
+     |> assign(:peer_2, nil)
      |> assign(:local_video_class, @larger_video_classes)
      |> assign(:remote_video_class, @smaller_video_classes)
      |> push_event("end_call", %{})}

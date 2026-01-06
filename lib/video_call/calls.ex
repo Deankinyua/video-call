@@ -38,7 +38,7 @@ defmodule VideoCall.Calls do
     do: send_message(recipient, {:incoming_call, caller})
 
   @doc """
-  Sends ICE candidates to a specific user for WebRTC connection establishment.
+  Sends an ICE candidate to a specific user for WebRTC connection establishment.
 
   ICE (Interactive Connectivity Establishment) candidates are used to negotiate
   the best path for peer-to-peer communication between callers.
@@ -50,12 +50,12 @@ defmodule VideoCall.Calls do
 
   ## Examples
 
-      iex> send_ice_candidates("john", %{"candidate" => "...", "sdpMid" => "0"})
+      iex> send_ice_candidate("john", %{"candidate" => "...", "sdpMid" => "0"})
       :ok
 
   """
-  @spec send_ice_candidates(username(), any()) :: :ok
-  def send_ice_candidates(recipient, candidate),
+  @spec send_ice_candidate(username(), any()) :: :ok
+  def send_ice_candidate(recipient, candidate),
     do: send_message(recipient, {:new_candidate, candidate})
 
   @doc """
