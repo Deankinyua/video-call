@@ -209,7 +209,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      id="toast"
+      id="call-termination-notification"
       class="fixed bottom-[15vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
       phx-hook="Animation"
     >

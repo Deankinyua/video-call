@@ -205,13 +205,11 @@ defmodule VideoCallWeb.VideoLive.Index do
     {:noreply, socket}
   end
 
-  def handle_event("animation-finished", %{"target" => "toast"}, socket) do
-    {:noreply, assign(socket, :show_call_termination_message, false)}
-  end
+  def handle_event("animation-finished", %{"target" => "call-termination-notification"}, socket),
+    do: {:noreply, assign(socket, :show_call_termination_message, false)}
 
-  def handle_event("animation-finished", _params, socket) do
-    {:noreply, assign(socket, :show_call_declined_notification, false)}
-  end
+  def handle_event("animation-finished", _params, socket),
+    do: {:noreply, assign(socket, :show_call_declined_notification, false)}
 
   @impl Phoenix.LiveView
   def handle_info(
@@ -220,7 +218,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       ),
       do:
         {:noreply,
-         push_event(socket, "add_ice_candidates_from_other_peer", %{candidate: candidate})}
+         push_event(socket, "add_ice_candidate_from_other_peer", %{candidate: candidate})}
 
   def handle_info(
         {:answer_to_offer, answer},

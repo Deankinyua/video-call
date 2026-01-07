@@ -43,7 +43,7 @@ RtcConnectionHooks.RtcConnection = {
       });
     });
 
-    this.handleEvent("add_ice_candidates_from_other_peer", ({ candidate }) => {
+    this.handleEvent("add_ice_candidate_from_other_peer", ({ candidate }) => {
       this.peerConnection.addIceCandidate(candidate);
     });
 
