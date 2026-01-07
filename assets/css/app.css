@@ -62,3 +62,9 @@
 .animate-toast {
   animation: toast-lifecycle 3s ease-in-out forwards;
 }
+
+@media (min-width: 420px) {
+  .left-medium {
+    left: calc((100% - 22rem) / 2);
+  }
+}

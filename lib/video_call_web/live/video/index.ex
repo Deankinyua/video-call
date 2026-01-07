@@ -18,11 +18,9 @@ defmodule VideoCallWeb.VideoLive.Index do
       class="h-screen relative bg-black overflow-y-hidden"
       phx-hook="RtcConnection"
     >
-      <VideoComponents.call_notification show?={@show_incoming_call_notification} caller={@peer_2} />
-
       <div
         id="contacts"
-        class="z-50 w-full h-screen px-2 contacts-shadow absolute hidden bg-[#1E1F24] text-[#E6E8EC] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:rounded-xl sm:top-4 sm:right-4"
+        class="z-[2000] w-full h-screen px-2 contacts-shadow absolute hidden bg-[#1E1F24] text-[#E6E8EC] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:rounded-xl sm:top-4 sm:right-4"
       >
         <section class="w-[92%] mx-auto my-4 flex flex-col gap-4">
           <div
@@ -47,6 +45,10 @@ defmodule VideoCallWeb.VideoLive.Index do
 
       <div class="py-10 px-4">
         <div id="videos" class="relative">
+          <VideoComponents.call_notification
+            show?={@show_incoming_call_notification}
+            caller={@peer_2}
+          />
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
           <VideoComponents.controls />
@@ -74,12 +76,12 @@ defmodule VideoCallWeb.VideoLive.Index do
     {:ok,
      socket
      |> assign(:call_terminator, "")
-     |> assign(:peer_2, "")
      |> assign(:contacts, contacts)
      |> assign(
        :local_video_class,
        @larger_video_classes
      )
+     |> assign(:peer_2, "")
      |> assign(
        :remote_video_class,
        @smaller_video_classes
@@ -187,8 +189,8 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:noreply,
      socket
-     |> assign(:peer_2, nil)
      |> assign(:local_video_class, @larger_video_classes)
+     |> assign(:peer_2, nil)
      |> assign(:remote_video_class, @smaller_video_classes)
      |> push_event("end_call", %{})}
   end
@@ -253,8 +255,8 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     {:noreply,
      socket
-     |> assign(:peer_2, call_acceptor)
      |> assign(:local_video_class, @smaller_video_classes)
+     |> assign(:peer_2, call_acceptor)
      |> assign(:remote_video_class, @larger_video_classes)}
   end
 

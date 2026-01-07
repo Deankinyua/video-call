@@ -14,58 +14,52 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      class="z-[1000] w-[60%] flex flex-col gap-2 items-center mt-2 absolute top-[3rem] left-[20%] mx-auto rounded-lg text-[#FFFFFF]"
+      class="w-[86%] max-w-[22rem] absolute top-6 left-[7%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
     >
-      <div class="flex flex-col gap-2 items-center">
-        <section>
+      <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
+        <div class="relative shrink-0">
           <img
             src="/images/default_avatar.jpg"
             alt={@caller}
-            class="w-24 h-24 rounded-full object-cover"
+            class="w-14 h-14 rounded-full object-cover border-2 border-white/20"
           />
-        </section>
-        <section>{@caller}</section>
-        <section>Incoming call...</section>
-      </div>
-      <div class="flex gap-28">
-        <section class="flex flex-col gap-2 items-center">
-          <button
-            class="w-14 h-14 rounded-full bg-[#FF3B30] flex items-center justify-center"
-            phx-click={JS.push("decline_call")}
-          >
-            <svg
-              fill="#ffffff"
-              width="26px"
-              height="26px"
-              viewBox="0 0 56 56"
-              xmlns="http://www.w3.org/2000/svg"
-              stroke="#ffffff"
+          <span class="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-black/40 animate-pulse">
+          </span>
+        </div>
+
+        <div class="flex-1 flex flex-col">
+          <h3 class="text-white font-semibold text-lg leading-tight truncate">{@caller}</h3>
+          <p class="text-white/70 text-sm">Incoming video call...</p>
+
+          <div class="flex gap-3 mt-3">
+            <button
+              phx-click={JS.push("decline_call")}
+              class="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-100 transition-colors border border-red-500/20"
             >
-              <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-              <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-              <g id="SVGRepo_iconCarrier">
-                <path d="M 28.0235 17.6055 C 17.8751 17.6055 8.3361 19.7383 3.5783 24.4961 C 1.4454 26.6524 .3439 29.2539 .4845 32.3945 C .5782 34.2929 1.1642 35.9805 2.2657 37.0820 C 3.1095 37.9258 4.2345 38.3945 5.5704 38.1836 L 14.2657 36.7070 C 15.5783 36.4961 16.4923 36.0976 17.0783 35.4883 C 17.8517 34.7383 18.0861 33.6133 18.0861 32.1367 L 18.1095 29.7695 C 18.1095 29.3945 18.2735 29.1133 18.4845 28.8789 C 18.7188 28.5976 19.0704 28.4805 19.3283 28.4102 C 20.9220 28.0351 24.1798 27.6836 28.0235 27.6836 C 31.8908 27.6836 35.1251 27.9648 36.7188 28.4336 C 36.9532 28.5039 37.2814 28.6445 37.5392 28.8789 C 37.7735 29.1133 37.9142 29.3711 37.9142 29.7461 L 37.9376 32.1367 C 37.9610 33.6133 38.1954 34.7383 38.9454 35.4883 C 39.5548 36.0976 40.4688 36.4961 41.7814 36.7070 L 50.3593 38.1602 C 51.7422 38.3945 52.9144 37.9024 53.8283 37.0117 C 54.9299 35.9336 55.5390 34.2695 55.5861 32.3711 C 55.6561 29.2070 54.4609 26.6055 52.3518 24.4961 C 47.5705 19.7383 38.1720 17.6055 28.0235 17.6055 Z">
-                </path>
-              </g>
-            </svg>
-          </button>
-          <div>Decline</div>
-        </section>
-        <section class="flex flex-col gap-2 items-center">
-          <button
-            class="w-14 h-14 rounded-full bg-[#34C759] flex items-center justify-center"
-            phx-click={JS.push("accept_call")}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" class="size-6">
-              <path
-                fill-rule="evenodd"
-                d="M1.5 4.5a3 3 0 0 1 3-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 0 1-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 0 0 6.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 0 1 1.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 0 1-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5Z"
-                clip-rule="evenodd"
-              />
-            </svg>
-          </button>
-          <div>Answer</div>
-        </section>
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                  transform="rotate(135 12 12)"
+                />
+              </svg>
+              <span class="text-xs font-medium">Decline</span>
+            </button>
+
+            <button
+              phx-click={JS.push("accept_call")}
+              class="flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-green-500 hover:bg-green-600 text-white transition-all shadow-lg shadow-green-500/20 active:scale-95"
+            >
+              <div class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75">
+                </span>
+                <svg class="relative w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </div>
+              <span class="text-xs font-medium">Answer</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     """
@@ -168,7 +162,7 @@ defmodule VideoCallWeb.VideoComponents do
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
-    <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-10 py-3 flex gap-4">
+    <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
       <.show_contacts_button />
       <.end_call_button />
     </div>
