@@ -36,3 +36,35 @@
     0px 3px 14px rgba(19, 0, 33, 0.12),
     0px 5px 5px rgba(19, 0, 33, 0.2);
 }
+
+/* Toast animation - 3 second lifecycle */
+
+@keyframes toast-lifecycle {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(1rem);
+  }
+  8% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  85% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(1rem);
+    visibility: hidden;
+  }
+}
+
+.animate-toast {
+  animation: toast-lifecycle 3s ease-in-out forwards;
+}
+
+@media (min-width: 420px) {
+  .left-medium {
+    left: calc((100% - 22rem) / 2);
+  }
+}

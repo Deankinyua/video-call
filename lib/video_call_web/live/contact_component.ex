@@ -11,11 +11,11 @@ defmodule VideoCallWeb.ContactComponent do
         <div class="shrink-0">
           <img
             src="/images/default_avatar.jpg"
-            alt={@contact.username}
+            alt={@username}
             class="w-12 h-12 rounded-full object-cover"
           />
         </div>
-        <div class="text-lg">{@contact.username}</div>
+        <div class="text-lg">{@username}</div>
       </section>
       <button
         class="w-11 h-11 rounded-full bg-[#2ED760] flex items-center justify-center"
@@ -38,8 +38,8 @@ defmodule VideoCallWeb.ContactComponent do
 
   @impl Phoenix.LiveComponent
   def handle_event("call", _params, socket) do
-    contact = socket.assigns.contact
-    send(self(), {:notify_recipient, contact.id})
+    recipient = socket.assigns.username
+    send(self(), {:notify_recipient_of_incoming_call, recipient})
     {:noreply, socket}
   end
 end

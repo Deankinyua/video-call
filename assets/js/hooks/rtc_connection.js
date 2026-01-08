@@ -43,12 +43,17 @@ RtcConnectionHooks.RtcConnection = {
       });
     });
 
-    this.handleEvent("add_ice_candidates_from_other_peer", ({ candidate }) => {
+    this.handleEvent("add_ice_candidate_from_other_peer", ({ candidate }) => {
       this.peerConnection.addIceCandidate(candidate);
     });
 
     this.handleEvent("add_answer", ({ answer }) => {
       this.addAnswer(answer);
+    });
+
+    this.handleEvent("end_call", () => {
+      this.peerConnection.close();
+      this.remoteVideoEl.srcObject = new MediaStream();
     });
   },
 
@@ -181,7 +186,7 @@ RtcConnectionHooks.RtcConnection = {
       // check if icecandidates were generated
       pc.addEventListener("icecandidate", (e) => {
         if (e.candidate) {
-          this.pushEvent("send_ice_candidates_to_signalling_server", {
+          this.pushEvent("send_ice_candidate_to_signalling_server", {
             did_i_offer: this.didIOffer,
             ice_candidate: e.candidate,
           });

@@ -49,7 +49,7 @@ defmodule VideoCall.Accounts.User do
   def registration_changeset(user, attrs, opts \\ []) do
     user
     |> cast(attrs, [:email, :password, :username])
-    |> unique_constraint(:username)
+    |> unique_constraint(:username, message: "This username has already been taken")
     |> validate_email(opts)
     |> validate_password(opts)
   end
@@ -112,7 +112,7 @@ defmodule VideoCall.Accounts.User do
     if Keyword.get(opts, :validate_email, true) do
       changeset
       |> unsafe_validate_unique(:email, VideoCall.Repo)
-      |> unique_constraint(:email)
+      |> unique_constraint(:email, message: "This email has already been taken")
     else
       changeset
     end

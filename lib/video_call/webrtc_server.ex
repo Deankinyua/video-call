@@ -86,7 +86,7 @@ defmodule VideoCall.WebrtcServer do
     state =
       if offer_obj do
         answerer = offer_obj.answerer
-        Calls.send_ice_candidates(answerer, candidate)
+        Calls.send_ice_candidate(answerer, candidate)
 
         ice_candidates = [candidate | offer_obj.offerer_ice_candidates]
 
@@ -109,7 +109,7 @@ defmodule VideoCall.WebrtcServer do
     state =
       if offer_obj do
         offerer = offer_obj.offerer
-        Calls.send_ice_candidates(offerer, candidate)
+        Calls.send_ice_candidate(offerer, candidate)
 
         ice_candidates = [candidate | offer_obj.answerer_ice_candidates]
 
