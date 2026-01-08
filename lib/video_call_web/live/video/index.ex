@@ -51,7 +51,7 @@ defmodule VideoCallWeb.VideoLive.Index do
           />
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
-          <VideoComponents.controls />
+          <VideoComponents.controls being_called?={@show_incoming_call_notification} />
         </div>
       </div>
 

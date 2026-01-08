@@ -14,8 +14,10 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
-      class="w-[86%] max-w-[22rem] absolute top-6 left-[7%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
+      class="w-[86%] max-w-[22rem] absolute top-6 left-[6%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
     >
+      <audio id="call-ringing-audio" src={~p"/sounds/ringtone.mp3"} autoplay loop phx-update="ignore">
+      </audio>
       <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
         <div class="relative shrink-0">
           <img
@@ -65,12 +67,15 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :being_called?, :boolean, required: true
+
   @spec end_call_button(assigns()) :: rendered()
   def end_call_button(assigns) do
     ~H"""
     <button
-      class="w-12 h-10 rounded-3xl flex items-center justify-center bg-[#FF3B30]"
+      class="w-12 h-10 rounded-3xl flex items-center justify-center bg-[#FF3B30] disabled:opacity-50 disabled:cursor-not-allowed"
       phx-click={JS.push("end_call")}
+      disabled={@being_called?}
     >
       <svg
         fill="#ffffff"
@@ -159,12 +164,14 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :being_called?, :boolean, required: true
+
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
     <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
       <.show_contacts_button />
-      <.end_call_button />
+      <.end_call_button being_called?={@being_called?} />
     </div>
     """
   end
