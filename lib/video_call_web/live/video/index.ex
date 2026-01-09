@@ -20,18 +20,29 @@ defmodule VideoCallWeb.VideoLive.Index do
     >
       <section
         id="contacts"
-        class="z-[2000] w-full h-screen px-2 contacts-shadow absolute hidden bg-[#1E1F24] text-[#E6E8EC] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:rounded-xl sm:top-4 sm:right-4"
+        class="z-[2000] fixed inset-0 sm:absolute sm:inset-auto hidden w-full h-full sm:w-96 sm:h-[600px] sm:top-6 sm:right-6 bg-zinc-900/95 backdrop-blur-xl text-zinc-100 overflow-hidden sm:rounded-2xl sm:border sm:border-white/10 shadow-2xl flex flex-col"
       >
-        <section class="w-[92%] mx-auto my-4 flex flex-col gap-4">
-          <div
-            class="flex justify-between items-center"
-            phx-click={JS.hide(to: "#contacts", transition: "ease-in-out duration-300")}
-          >
-            <p class="roboto-semibold text-xl">Contacts</p>
-
-            <VideoComponents.close_contacts_button />
-          </div>
+        <header class="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
           <div>
+            <h2 class="font-semibold text-xl tracking-tight">Contacts</h2>
+            <p class="text-xs text-zinc-500">0 people available</p>
+          </div>
+
+          <button
+            phx-click={
+              JS.hide(
+                to: "#contacts",
+                transition: "transition-all ease-in-out duration-300 opacity-0 scale-95"
+              )
+            }
+            class="p-2 hover:bg-white/10 rounded-full transition-colors"
+          >
+            <VideoComponents.close_contacts_button />
+          </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+          <div class="space-y-1">
             <div :for={contact <- @contacts}>
               <.live_component
                 id={"contact-#{contact.id}"}
@@ -40,7 +51,7 @@ defmodule VideoCallWeb.VideoLive.Index do
               />
             </div>
           </div>
-        </section>
+        </div>
       </section>
 
       <VideoComponents.outgoing_call_notification
