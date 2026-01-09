@@ -6,8 +6,8 @@ defmodule VideoCallWeb.VideoComponents do
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
 
-  attr :show?, :boolean, required: true
   attr :caller, :string, required: true
+  attr :show?, :boolean, required: true
 
   @spec incoming_call_notification(assigns()) :: rendered()
   def incoming_call_notification(assigns) do
@@ -15,6 +15,7 @@ defmodule VideoCallWeb.VideoComponents do
     <div
       :if={@show?}
       class="w-[86%] max-w-[22rem] absolute top-6 left-[6%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
+      phx-mounted={JS.hide(to: "#contacts")}
     >
       <audio id="call-ringing-audio" src={~p"/sounds/ringtone.mp3"} autoplay loop phx-update="ignore">
       </audio>
@@ -67,8 +68,8 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
-  attr :show?, :boolean, required: true
   attr :callee, :string, required: true
+  attr :show?, :boolean, required: true
 
   @spec outgoing_call_notification(assigns()) :: rendered()
   def outgoing_call_notification(assigns) do
@@ -150,6 +151,8 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :being_called?, :boolean, required: true
+
   @spec show_contacts_button(assigns()) :: rendered()
   def show_contacts_button(assigns) do
     ~H"""
@@ -157,7 +160,8 @@ defmodule VideoCallWeb.VideoComponents do
       phx-click={
         JS.toggle(to: "#contacts", in: "ease-out duration-300", out: "ease-in-out duration-300")
       }
-      class="flex items-center justify-center w-12 h-10 rounded-3xl bg-[#3c3c3e]"
+      class="flex items-center justify-center w-12 h-10 rounded-3xl bg-[#3c3c3e] disabled:opacity-50 disabled:cursor-not-allowed"
+      disabled={@being_called?}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -224,14 +228,14 @@ defmodule VideoCallWeb.VideoComponents do
   def controls(assigns) do
     ~H"""
     <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
-      <.show_contacts_button />
+      <.show_contacts_button being_called?={@being_called?} />
       <.end_call_button being_called?={@being_called?} />
     </div>
     """
   end
 
-  attr :show?, :boolean, required: true
   attr :callee, :string, required: true
+  attr :show?, :boolean, required: true
 
   @spec call_declined_notification(assigns()) :: rendered()
   def call_declined_notification(assigns) do

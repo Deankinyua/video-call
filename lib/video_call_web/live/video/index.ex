@@ -34,9 +34,9 @@ defmodule VideoCallWeb.VideoLive.Index do
           <div>
             <div :for={contact <- @contacts}>
               <.live_component
-                username={contact.username}
                 id={"contact-#{contact.id}"}
                 module={ContactComponent}
+                username={contact.username}
               />
             </div>
           </div>
@@ -44,28 +44,30 @@ defmodule VideoCallWeb.VideoLive.Index do
       </section>
 
       <VideoComponents.outgoing_call_notification
-        show?={@show_outgoing_call_notification?}
         callee={@peer_2}
+        show?={@show_outgoing_call_notification?}
       />
 
       <div class="py-10 px-4">
         <div id="videos" class="relative">
           <VideoComponents.incoming_call_notification
-            show?={@show_incoming_call_notification?}
             caller={@peer_2}
+            show?={@show_incoming_call_notification?}
           />
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
           <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
         </div>
       </div>
+
       <VideoComponents.call_declined_notification
-        show?={@show_call_declined_notification?}
         callee={@peer_2}
+        show?={@show_call_declined_notification?}
       />
+
       <VideoComponents.call_termination_notification
-        show?={@show_call_termination_message?}
         message={@call_termination_message}
+        show?={@show_call_termination_message?}
       />
     </div>
     """
@@ -166,12 +168,11 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "end_call",
         _params,
-        socket
+        %{assigns: %{current_user: user}} = socket
       ) do
-    call_terminator = socket.assigns.current_user.username
     peer_2 = socket.assigns.peer_2
 
-    if peer_2, do: Calls.notify_remote_peer_of_call_termination(peer_2, call_terminator)
+    if peer_2, do: Calls.notify_remote_peer_of_call_termination(peer_2, user.username)
 
     {:noreply,
      socket
@@ -214,10 +215,9 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_info(
         {:new_candidate, candidate},
         socket
-      ),
-      do:
-        {:noreply,
-         push_event(socket, "add_ice_candidate_from_other_peer", %{candidate: candidate})}
+      ) do
+    {:noreply, push_event(socket, "add_ice_candidate_from_other_peer", %{candidate: candidate})}
+  end
 
   def handle_info(
         {:answer_to_offer, answer},

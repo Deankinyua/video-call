@@ -136,7 +136,7 @@ defmodule VideoCall.Calls do
     do: send_message(recipient, {:call_terminated_by_other_peer, call_terminator})
 
   @doc """
-  Use this function to notify the remote peer after caller ended the call before they could answer.
+  Use this function to notify the remote peer of a missed call.
   ## Parameters
 
     * `recipient` - The user to be notified of call termination.
