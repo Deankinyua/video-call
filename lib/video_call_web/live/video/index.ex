@@ -18,7 +18,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       class="h-screen relative bg-black overflow-y-hidden"
       phx-hook="RtcConnection"
     >
-      <div
+      <section
         id="contacts"
         class="z-[2000] w-full h-screen px-2 contacts-shadow absolute hidden bg-[#1E1F24] text-[#E6E8EC] overflow-y-scroll sm:w-[22rem] sm:h-[50vh] sm:my-4 sm:rounded-xl sm:top-4 sm:right-4"
       >
@@ -41,28 +41,29 @@ defmodule VideoCallWeb.VideoLive.Index do
             </div>
           </div>
         </section>
-      </div>
+      </section>
 
-      <div class="py-10 px-4">
-        <div id="videos" class="relative">
-          <VideoComponents.call_notification
-            show?={@show_incoming_call_notification?}
-            caller={@peer_2}
-          />
-          <VideoComponents.local_video class={@local_video_class} />
-          <VideoComponents.remote_video class={@remote_video_class} />
-          <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
+      <section>
+        <div class="py-10 px-4">
+          <div id="videos" class="relative">
+            <VideoComponents.call_notification
+              show?={@show_incoming_call_notification?}
+              caller={@peer_2}
+            />
+            <VideoComponents.local_video class={@local_video_class} />
+            <VideoComponents.remote_video class={@remote_video_class} />
+            <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
+          </div>
         </div>
-      </div>
-
-      <VideoComponents.call_declined_notification
-        show?={@show_call_declined_notification?}
-        callee={@peer_2}
-      />
-      <VideoComponents.call_termination_notification
-        show?={@show_call_termination_message?}
-        message={"#{@call_terminator} ended the call"}
-      />
+        <VideoComponents.call_declined_notification
+          show?={@show_call_declined_notification?}
+          callee={@peer_2}
+        />
+        <VideoComponents.call_termination_notification
+          show?={@show_call_termination_message?}
+          message={"#{@call_terminator} ended the call"}
+        />
+      </section>
     </div>
     """
   end
