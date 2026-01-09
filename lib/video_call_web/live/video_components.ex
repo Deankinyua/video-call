@@ -9,8 +9,8 @@ defmodule VideoCallWeb.VideoComponents do
   attr :show?, :boolean, required: true
   attr :caller, :string, required: true
 
-  @spec call_notification(assigns()) :: rendered()
-  def call_notification(assigns) do
+  @spec incoming_call_notification(assigns()) :: rendered()
+  def incoming_call_notification(assigns) do
     ~H"""
     <div
       :if={@show?}
@@ -63,6 +63,60 @@ defmodule VideoCallWeb.VideoComponents do
           </div>
         </div>
       </div>
+    </div>
+    """
+  end
+
+  attr :show?, :boolean, required: true
+  attr :callee, :string, required: true
+
+  @spec outgoing_call_notification(assigns()) :: rendered()
+  def outgoing_call_notification(assigns) do
+    ~H"""
+    <div
+      :if={@show?}
+      class="h-screen inset-0 bg-neutral-950 flex items-center justify-center p-6 z-[100]"
+    >
+      <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px]">
+        </div>
+      </div>
+
+      <section class="relative w-full max-w-md flex flex-col items-center justify-between h-[70vh] text-white">
+        <div class="text-center space-y-2">
+          <p class="text-sm font-medium tracking-widest uppercase text-white/50">Calling...</p>
+          <h2 class="text-4xl font-light">{@callee}</h2>
+        </div>
+
+        <div class="relative flex items-center justify-center">
+          <div class="absolute w-32 h-32 bg-white/10 rounded-full animate-ping"></div>
+          <div class="absolute w-48 h-48 bg-white/5 rounded-full animate-[ping_3s_linear_infinite]">
+          </div>
+
+          <div class="relative w-32 h-32 md:w-40 md:h-40">
+            <img
+              src="/images/default_avatar.jpg"
+              alt="recipient picture"
+              class="w-full h-full rounded-full object-cover border-4 border-white/10 shadow-2xl"
+            />
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center gap-6 w-full">
+          <p class="text-white/40 text-sm animate-pulse">Waiting for answer</p>
+
+          <button
+            phx-click={JS.push("stop_calling")}
+            class="group w-16 h-16 rounded-full flex items-center justify-center bg-red-500 hover:bg-red-600 transition-all duration-300 hover:scale-110 active:scale-90 shadow-xl shadow-red-500/20"
+          >
+            <svg class="w-8 h-8 fill-white rotate-[135deg]" viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+            </svg>
+          </button>
+
+          <span class="text-xs text-white/20 font-medium tracking-tighter">END CALL</span>
+        </div>
+      </section>
     </div>
     """
   end

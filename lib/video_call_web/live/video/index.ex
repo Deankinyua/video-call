@@ -43,27 +43,30 @@ defmodule VideoCallWeb.VideoLive.Index do
         </section>
       </section>
 
-      <section>
-        <div class="py-10 px-4">
-          <div id="videos" class="relative">
-            <VideoComponents.call_notification
-              show?={@show_incoming_call_notification?}
-              caller={@peer_2}
-            />
-            <VideoComponents.local_video class={@local_video_class} />
-            <VideoComponents.remote_video class={@remote_video_class} />
-            <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
-          </div>
+      <VideoComponents.outgoing_call_notification
+        show?={@show_outgoing_call_notification?}
+        callee={@peer_2}
+      />
+
+      <div class="py-10 px-4">
+        <div id="videos" class="relative">
+          <VideoComponents.incoming_call_notification
+            show?={@show_incoming_call_notification?}
+            caller={@peer_2}
+          />
+          <VideoComponents.local_video class={@local_video_class} />
+          <VideoComponents.remote_video class={@remote_video_class} />
+          <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
         </div>
-        <VideoComponents.call_declined_notification
-          show?={@show_call_declined_notification?}
-          callee={@peer_2}
-        />
-        <VideoComponents.call_termination_notification
-          show?={@show_call_termination_message?}
-          message={"#{@call_terminator} ended the call"}
-        />
-      </section>
+      </div>
+      <VideoComponents.call_declined_notification
+        show?={@show_call_declined_notification?}
+        callee={@peer_2}
+      />
+      <VideoComponents.call_termination_notification
+        show?={@show_call_termination_message?}
+        message={@call_termination_message}
+      />
     </div>
     """
   end
@@ -179,6 +182,19 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_event(
+        "stop_calling",
+        _params,
+        %{assigns: %{peer_2: peer_2, current_user: user}} = socket
+      ) do
+    Calls.send_missed_call_notification(peer_2, user.username)
+
+    {:noreply,
+     socket
+     |> assign(:peer_2, nil)
+     |> assign(:show_outgoing_call_notification?, false)}
+  end
+
+  def handle_event(
         "set_remote_description_of_offerer",
         %{"answer" => answer, "offerer" => offerer},
         socket
@@ -216,7 +232,11 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     Calls.call(recipient, user.username)
 
-    {:noreply, push_event(socket, "create_offer", %{})}
+    {:noreply,
+     socket
+     |> assign(:peer_2, recipient)
+     |> assign(:show_outgoing_call_notification?, true)
+     |> push_event("create_offer", %{})}
   end
 
   def handle_info(
@@ -238,7 +258,8 @@ defmodule VideoCallWeb.VideoLive.Index do
      socket
      |> assign(:local_video_class, @smaller_video_classes)
      |> assign(:peer_2, call_acceptor)
-     |> assign(:remote_video_class, @larger_video_classes)}
+     |> assign(:remote_video_class, @larger_video_classes)
+     |> assign(:show_outgoing_call_notification?, false)}
   end
 
   # negative scenarios, call declined or call terminated
@@ -249,7 +270,8 @@ defmodule VideoCallWeb.VideoLive.Index do
     {:noreply,
      socket
      |> assign(:peer_2, callee_username)
-     |> assign(:show_call_declined_notification?, true)}
+     |> assign(:show_call_declined_notification?, true)
+     |> assign(:show_outgoing_call_notification?, false)}
   end
 
   def handle_info(
@@ -258,20 +280,32 @@ defmodule VideoCallWeb.VideoLive.Index do
       ) do
     {:noreply,
      socket
-     |> assign(:call_terminator, call_terminator)
+     |> assign(:call_termination_message, "#{call_terminator} ended the call")
      |> assign(:local_video_class, @larger_video_classes)
      |> assign(:remote_video_class, @smaller_video_classes)
      |> assign(:show_call_termination_message?, true)
      |> push_event("end_call", %{})}
   end
 
+  def handle_info(
+        {:missed_call, caller},
+        socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:call_termination_message, "#{caller} got tired of waiting")
+     |> assign(:show_call_termination_message?, true)
+     |> assign(:show_incoming_call_notification?, false)}
+  end
+
   defp assign_call_state(socket) do
     socket
-    |> assign(:call_terminator, "")
+    |> assign(:call_termination_message, "")
     |> assign(:peer_2, "")
     |> assign(:show_call_declined_notification?, false)
     |> assign(:show_call_termination_message?, false)
     |> assign(:show_incoming_call_notification?, false)
+    |> assign(:show_outgoing_call_notification?, false)
   end
 
   defp assign_contacts(socket), do: assign(socket, :contacts, Accounts.list_users())

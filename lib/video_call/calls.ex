@@ -135,6 +135,24 @@ defmodule VideoCall.Calls do
   def notify_remote_peer_of_call_termination(recipient, call_terminator),
     do: send_message(recipient, {:call_terminated_by_other_peer, call_terminator})
 
+  @doc """
+  Use this function to notify the remote peer after caller ended the call before they could answer.
+  ## Parameters
+
+    * `recipient` - The user to be notified of call termination.
+    * `caller` - The user who ended the call.
+
+  ## Examples
+
+      iex> send_missed_call_notification("john", "rahab")
+      :ok
+
+  """
+
+  @spec send_missed_call_notification(username(), username()) :: :ok
+  def send_missed_call_notification(recipient, caller),
+    do: send_message(recipient, {:missed_call, caller})
+
   defp send_message(recipient, message) do
     Phoenix.PubSub.broadcast(
       VideoCall.PubSub,
