@@ -67,7 +67,10 @@ defmodule VideoCallWeb.VideoLive.Index do
           />
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
-          <VideoComponents.controls being_called?={@show_incoming_call_notification?} />
+          <VideoComponents.controls
+            being_called?={@show_incoming_call_notification?}
+            on_call?={@on_call?}
+          />
         </div>
       </div>
 
@@ -166,28 +169,18 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   def handle_event(
-        "clear_offer_object",
-        _params,
-        socket
-      ) do
-    offer_id = socket.assigns.current_user.username
-    WebrtcServer.clear_offer_object(offer_id)
-
-    {:noreply, socket}
-  end
-
-  def handle_event(
         "end_call",
         _params,
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{current_user: user, peer_2: peer_2}} = socket
       ) do
-    peer_2 = socket.assigns.peer_2
-
-    if peer_2, do: Calls.notify_remote_peer_of_call_termination(peer_2, user.username)
+    Calls.notify_remote_peer_of_call_termination(peer_2, user.username)
+    WebrtcServer.clear_offer_object(user.username)
+    WebrtcServer.clear_offer_object(peer_2)
 
     {:noreply,
      socket
      |> assign(:local_video_class, @larger_video_classes)
+     |> assign(:on_call?, false)
      |> assign(:peer_2, nil)
      |> assign(:remote_video_class, @smaller_video_classes)
      |> push_event("end_call", %{})}
@@ -199,6 +192,7 @@ defmodule VideoCallWeb.VideoLive.Index do
         %{assigns: %{peer_2: peer_2, current_user: user}} = socket
       ) do
     Calls.send_missed_call_notification(peer_2, user.username)
+    WebrtcServer.clear_offer_object(user.username)
 
     {:noreply,
      socket
@@ -215,6 +209,32 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:noreply, socket}
   end
+
+  def handle_event(
+        "peer_connection_disconnected",
+        _params,
+        %{assigns: %{current_user: user, peer_2: peer_2}} = socket
+      ) do
+    WebrtcServer.clear_offer_object(user.username)
+    WebrtcServer.clear_offer_object(peer_2)
+
+    {:noreply,
+     socket
+     |> assign(:call_termination_message, "call was ended due #{peer_2}'s network issues")
+     |> assign(:local_video_class, @larger_video_classes)
+     |> assign(:on_call?, false)
+     |> assign(:peer_2, nil)
+     |> assign(:remote_video_class, @smaller_video_classes)
+     |> assign(:show_call_termination_message?, true)
+     |> push_event("end_call", %{})}
+  end
+
+  def handle_event(
+        "peer_connection_connected",
+        _params,
+        socket
+      ),
+      do: {:noreply, assign(socket, :on_call?, true)}
 
   def handle_event("animation-finished", %{"target" => "call-termination-notification"}, socket),
     do: {:noreply, assign(socket, :show_call_termination_message?, false)}
@@ -276,8 +296,10 @@ defmodule VideoCallWeb.VideoLive.Index do
   # negative scenarios, call declined or call terminated
   def handle_info(
         {:call_declined, callee_username},
-        socket
+        %{assigns: %{current_user: user}} = socket
       ) do
+    WebrtcServer.clear_offer_object(user.username)
+
     {:noreply,
      socket
      |> assign(:peer_2, callee_username)
@@ -293,6 +315,8 @@ defmodule VideoCallWeb.VideoLive.Index do
      socket
      |> assign(:call_termination_message, "#{call_terminator} ended the call")
      |> assign(:local_video_class, @larger_video_classes)
+     |> assign(:on_call?, false)
+     |> assign(:peer_2, nil)
      |> assign(:remote_video_class, @smaller_video_classes)
      |> assign(:show_call_termination_message?, true)
      |> push_event("end_call", %{})}
@@ -312,6 +336,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   defp assign_call_state(socket) do
     socket
     |> assign(:call_termination_message, "")
+    |> assign(:on_call?, false)
     |> assign(:peer_2, "")
     |> assign(:show_call_declined_notification?, false)
     |> assign(:show_call_termination_message?, false)

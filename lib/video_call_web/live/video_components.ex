@@ -123,6 +123,7 @@ defmodule VideoCallWeb.VideoComponents do
   end
 
   attr :being_called?, :boolean, required: true
+  attr :on_call?, :boolean, required: true
 
   @spec end_call_button(assigns()) :: rendered()
   def end_call_button(assigns) do
@@ -130,7 +131,7 @@ defmodule VideoCallWeb.VideoComponents do
     <button
       class="w-12 h-10 rounded-3xl flex items-center justify-center bg-[#FF3B30] disabled:opacity-50 disabled:cursor-not-allowed"
       phx-click={JS.push("end_call")}
-      disabled={@being_called?}
+      disabled={@being_called? || !@on_call?}
     >
       <svg
         fill="#ffffff"
@@ -152,6 +153,7 @@ defmodule VideoCallWeb.VideoComponents do
   end
 
   attr :being_called?, :boolean, required: true
+  attr :on_call?, :boolean, required: true
 
   @spec show_contacts_button(assigns()) :: rendered()
   def show_contacts_button(assigns) do
@@ -161,7 +163,7 @@ defmodule VideoCallWeb.VideoComponents do
         JS.toggle(to: "#contacts", in: "ease-out duration-300", out: "ease-in-out duration-300")
       }
       class="flex items-center justify-center w-12 h-10 rounded-3xl bg-[#3c3c3e] disabled:opacity-50 disabled:cursor-not-allowed"
-      disabled={@being_called?}
+      disabled={@being_called? || @on_call?}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -223,13 +225,14 @@ defmodule VideoCallWeb.VideoComponents do
   end
 
   attr :being_called?, :boolean, required: true
+  attr :on_call?, :boolean, required: true
 
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
     <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
-      <.show_contacts_button being_called?={@being_called?} />
-      <.end_call_button being_called?={@being_called?} />
+      <.show_contacts_button being_called?={@being_called?} on_call?={@on_call?} />
+      <.end_call_button being_called?={@being_called?} on_call?={@on_call?} />
     </div>
     """
   end
