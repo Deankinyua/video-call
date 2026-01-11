@@ -237,7 +237,12 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
-  attr :callee, :string, required: true
+  @doc """
+  A call will be declined if the callee specifically declines it or
+  they are on another call
+  """
+
+  attr :message, :string, required: true
   attr :show?, :boolean, required: true
 
   @spec call_declined_notification(assigns()) :: rendered()
@@ -263,11 +268,16 @@ defmodule VideoCallWeb.VideoComponents do
           </svg>
         </section>
 
-        <div class="text-sm font-medium">{@callee} declined your call.</div>
+        <div class="text-sm font-medium">{@message}</div>
       </div>
     </div>
     """
   end
+
+  @doc """
+  A call will be terminated if one of the peers specifically terminates it,
+  or they have a poor internet connection
+  """
 
   attr :message, :string, required: true
   attr :show?, :boolean, required: true

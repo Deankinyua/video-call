@@ -75,7 +75,7 @@ defmodule VideoCallWeb.VideoLive.Index do
       </div>
 
       <VideoComponents.call_declined_notification
-        callee={@peer_2}
+        message={@call_declined_message}
         show?={@show_call_declined_notification?}
       />
 
@@ -272,13 +272,16 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   def handle_info(
         {:incoming_call, caller},
-        socket
-      ) do
-    {:noreply,
-     socket
-     |> assign(:peer_2, caller)
-     |> assign(:show_incoming_call_notification?, true)}
-  end
+        %{
+          assigns: %{
+            on_call?: on_call?,
+            show_incoming_call_notification?: being_called?,
+            show_outgoing_call_notification?: calling_someone?
+          }
+        } =
+          socket
+      ),
+      do: handle_incoming_call(on_call?, being_called?, calling_someone?, caller, socket)
 
   # positive scenarios, call accepted
   def handle_info(
@@ -302,7 +305,8 @@ defmodule VideoCallWeb.VideoLive.Index do
 
     {:noreply,
      socket
-     |> assign(:peer_2, callee_username)
+     |> assign(:call_declined_message, "#{callee_username} declined the call")
+     |> assign(:peer_2, nil)
      |> assign(:show_call_declined_notification?, true)
      |> assign(:show_outgoing_call_notification?, false)}
   end
@@ -333,8 +337,21 @@ defmodule VideoCallWeb.VideoLive.Index do
      |> assign(:show_incoming_call_notification?, false)}
   end
 
+  def handle_info(
+        :line_busy,
+        %{assigns: %{peer_2: peer_2}} = socket
+      ) do
+    {:noreply,
+     socket
+     |> assign(:call_declined_message, "#{peer_2} is on another call")
+     |> assign(:peer_2, nil)
+     |> assign(:show_call_declined_notification?, true)
+     |> assign(:show_outgoing_call_notification?, false)}
+  end
+
   defp assign_call_state(socket) do
     socket
+    |> assign(:call_declined_message, "")
     |> assign(:call_termination_message, "")
     |> assign(:on_call?, false)
     |> assign(:peer_2, "")
@@ -355,5 +372,23 @@ defmodule VideoCallWeb.VideoLive.Index do
        local_video_class: "",
        remote_video_class: ""
      ]}
+  end
+
+  defp handle_incoming_call(on_call?, being_called?, calling_someone?, caller, socket)
+       when on_call? or being_called? or calling_someone? do
+    Calls.send_line_busy_notification(caller)
+
+    user = socket.assigns.current_user
+
+    WebrtcServer.clear_offer_object(user.username)
+
+    {:noreply, socket}
+  end
+
+  defp handle_incoming_call(_on_call?, _being_called?, _calling_someone?, caller, socket) do
+    {:noreply,
+     socket
+     |> assign(:peer_2, caller)
+     |> assign(:show_incoming_call_notification?, true)}
   end
 end

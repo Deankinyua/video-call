@@ -153,6 +153,23 @@ defmodule VideoCall.Calls do
   def send_missed_call_notification(recipient, caller),
     do: send_message(recipient, {:missed_call, caller})
 
+  @doc """
+  Used to notify the remote peer that the person they are trying to call is already on another call.
+  ## Parameters
+
+    * `recipient` - The user who will receive line_busy notification.
+
+  ## Examples
+
+      iex> send_line_busy_notification("john")
+      :ok
+
+  """
+
+  @spec send_line_busy_notification(username()) :: :ok
+  def send_line_busy_notification(recipient),
+    do: send_message(recipient, :line_busy)
+
   defp send_message(recipient, message) do
     Phoenix.PubSub.broadcast(
       VideoCall.PubSub,
