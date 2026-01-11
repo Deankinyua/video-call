@@ -180,6 +180,14 @@ RtcConnectionHooks.RtcConnection = {
       });
 
       pc.addEventListener("connectionstatechange", () => {
+        if (pc.connectionState === "disconnected") {
+          this.pushEvent("peer_connection_disconnected", {});
+        }
+
+        if (pc.connectionState === "connected") {
+          this.pushEvent("peer_connection_connected", {});
+        }
+
         console.log("Connection State:", pc.connectionState);
       });
 
