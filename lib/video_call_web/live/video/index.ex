@@ -339,8 +339,10 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   def handle_info(
         :line_busy,
-        %{assigns: %{peer_2: peer_2}} = socket
+        %{assigns: %{peer_2: peer_2, current_user: user}} = socket
       ) do
+    WebrtcServer.clear_offer_object(user.username)
+
     {:noreply,
      socket
      |> assign(:call_declined_message, "#{peer_2} is on another call")
@@ -377,10 +379,6 @@ defmodule VideoCallWeb.VideoLive.Index do
   defp handle_incoming_call(on_call?, being_called?, calling_someone?, caller, socket)
        when on_call? or being_called? or calling_someone? do
     Calls.send_line_busy_notification(caller)
-
-    user = socket.assigns.current_user
-
-    WebrtcServer.clear_offer_object(user.username)
 
     {:noreply, socket}
   end
