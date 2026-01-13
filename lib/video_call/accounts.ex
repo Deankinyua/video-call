@@ -3,22 +3,73 @@ defmodule VideoCall.Accounts do
   The Accounts context.
   """
 
+  import Ecto.Query
+
   alias VideoCall.Accounts.User
   alias VideoCall.Accounts.UserToken
   alias VideoCall.Repo
+  alias VideoCall.TextSearchHelpers
 
   @type attrs :: map()
   @type changeset :: Ecto.Changeset.t()
   @type email :: String.t()
+  @type filters :: map()
   @type id :: Ecto.UUID.t()
   @type password :: String.t()
   @type token :: binary()
   @type user :: User.t()
 
-  @spec list_users :: [user()]
-  def list_users do
-    Repo.all(User)
+  @doc """
+  Returns a list of users filtered by the given filters.
+
+   ## Examples
+
+      iex> list_users(%{search: "John"})
+      [%User{}, ...]
+  """
+  @spec list_users(filters()) :: [user()]
+  def list_users(filters \\ %{}) do
+    case safe_list_users(filters) do
+      {:ok, results} -> results
+      {:error, _reason} -> []
+    end
   end
+
+  defp safe_list_users(filters) do
+    filter_query = apply_filters()
+
+    result =
+      user_query()
+      |> where(^filter_query.(filters))
+      |> limit(12)
+      |> TextSearchHelpers.apply_search_ordering(filters[:search])
+      |> Repo.all()
+
+    {:ok, result}
+  rescue
+    DBConnection.OwnershipError ->
+      # Database sandbox not ready yet - return error
+      {:error, :db_ownership_error}
+
+    DBConnection.ConnectionError ->
+      # Database connection issues - return error
+      {:error, :db_connection_error}
+  end
+
+  defp user_query do
+    from user in User, as: :user
+  end
+
+  defp apply_filters do
+    fn filters ->
+      Enum.reduce(filters, dynamic(true), &apply_filter/2)
+    end
+  end
+
+  defp apply_filter({:search, search_query}, dynamic),
+    do: TextSearchHelpers.apply_filter({:search, search_query}, dynamic)
+
+  defp apply_filter(_other, dynamic), do: dynamic
 
   @doc """
   Gets a user by email.

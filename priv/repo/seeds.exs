@@ -9,3 +9,13 @@
 #
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
+
+alias VideoCall.Accounts
+
+attrs = %{
+  email: "kinyuadean@gmail.com",
+  username: "Dean",
+  password: "deandeandean"
+}
+
+Accounts.register_user(attrs)
