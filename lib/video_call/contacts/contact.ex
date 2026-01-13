@@ -12,6 +12,7 @@ defmodule VideoCall.Contacts.Contact do
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "contacts" do
+    belongs_to :contact_user, User
     belongs_to :user, User
 
     timestamps()
@@ -20,7 +21,10 @@ defmodule VideoCall.Contacts.Contact do
   @spec changeset(t(), map()) :: Ecto.Changeset.t()
   def changeset(contact, attrs) do
     contact
-    |> cast(attrs, [:user_id])
-    |> validate_required([:user_id])
+    |> cast(attrs, [:contact_user_id, :user_id])
+    |> unique_constraint([:contact_user_id, :user_id],
+      message: "You already saved this contact"
+    )
+    |> validate_required([:contact_user_id, :user_id])
   end
 end
