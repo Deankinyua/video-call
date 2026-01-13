@@ -11,9 +11,8 @@ defmodule VideoCall.Contacts do
   @type attrs :: map()
   @type changeset :: Ecto.Changeset.t()
   @type contact :: Contact.t()
-  @type filters :: map()
-  @type limit :: non_neg_integer()
   @type contact_id :: Ecto.UUID.t()
+  @type filters :: map()
 
   @doc """
   Creates a contact.
@@ -56,20 +55,20 @@ defmodule VideoCall.Contacts do
    ## Examples
 
       iex> list_contacts(%{user_id: user_id})
-      [%Drop{}, ...]
+      [%Contact{}, ...]
 
-      iex> list_contacts(%{older_than: %Drop{}})
-      [%Drop{}, ...]
+      iex> list_contacts(%{older_than: %Contact{}})
+      [%Contact{}, ...]
 
   """
 
-  @spec list_contacts(filters(), limit()) :: [contact()]
-  def list_contacts(filters, limit \\ 10) do
+  @spec list_contacts(filters()) :: [contact()]
+  def list_contacts(filters) do
     filter_query = apply_filters()
 
     contact_query()
     |> where(^filter_query.(filters))
-    |> limit(^limit)
+    |> limit(10)
     |> preload([:contact_user])
     |> order_by([u], {:desc, u.inserted_at})
     |> Repo.all()
