@@ -183,4 +183,27 @@ defmodule VideoCall.AccountsTest do
       refute Accounts.get_user_by_session_token(token)
     end
   end
+
+  describe "list_users/1" do
+    test "returns a list of all users when no filter is passed" do
+      _users = create_multiple_users(5)
+      all_users = Accounts.list_users()
+
+      assert length(all_users) == 5
+    end
+  end
+
+  test "returns an empty list when there are no users" do
+    assert [] = Accounts.list_users()
+  end
+
+  test "returns only relevant users when searching" do
+    _users = create_multiple_users(5)
+    relevant_user = user_fixture(%{username: "dean"})
+    users = Accounts.list_users(%{search: "Dean"})
+
+    assert length(users) == 1
+    only_user = Enum.at(users, 0)
+    assert relevant_user.id == only_user.id
+  end
 end
