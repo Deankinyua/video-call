@@ -183,6 +183,33 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  @spec link_to_contacts(assigns()) :: rendered()
+  def link_to_contacts(assigns) do
+    ~H"""
+    <div class="group w-max cursor-pointer ml-8 sm:ml-20" phx-click={JS.patch(~p"/contacts")}>
+      <div class="relative flex items-center gap-3 px-6 py-[10px] rounded-full bg-zinc-950 border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-emerald-500 group-hover:scale-110 transition-transform"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+
+        <span class="text-sm font-semibold tracking-wide text-zinc-100 group-hover:text-white">
+          Add Contacts
+        </span>
+
+        <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none">
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   @spec close_contacts_button(assigns()) :: rendered()
   def close_contacts_button(assigns) do
     ~H"""
@@ -230,9 +257,10 @@ defmodule VideoCallWeb.VideoComponents do
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
-    <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
+    <div class="w-max mx-auto px-4 mt-6 pt-4 flex gap-4 items-center">
       <.show_contacts_button being_called?={@being_called?} on_call?={@on_call?} />
       <.end_call_button being_called?={@being_called?} on_call?={@on_call?} />
+      <.link_to_contacts />
     </div>
     """
   end

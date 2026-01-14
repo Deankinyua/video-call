@@ -68,11 +68,11 @@ defmodule VideoCall.AccountsTest do
     end
 
     test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
+      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "nod"})
 
       assert %{
                email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               password: ["should be at least 5 character(s)"]
              } = errors_on(changeset)
     end
 

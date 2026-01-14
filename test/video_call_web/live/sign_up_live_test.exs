@@ -29,10 +29,10 @@ defmodule VideoCallWeb.UserRegistrationLiveTest do
       result =
         live
         |> element("#registration_form")
-        |> render_change(user: %{"email" => "with spaces", "password" => "too short"})
+        |> render_change(user: %{"email" => "with spaces", "password" => "trt"})
 
       assert result =~ "must have the @ sign and no spaces"
-      assert result =~ "should be at least 12 character"
+      assert result =~ "should be at least 5 character"
     end
 
     test "creates account and logs the user in", %{conn: conn} do

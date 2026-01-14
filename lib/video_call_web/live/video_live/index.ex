@@ -1,8 +1,8 @@
 defmodule VideoCallWeb.VideoLive.Index do
   use VideoCallWeb, :live_view
 
-  alias VideoCall.Accounts
   alias VideoCall.Calls
+  alias VideoCall.Contacts
   alias VideoCall.WebrtcServer
   alias VideoCallWeb.ContactComponent
   alias VideoCallWeb.VideoComponents
@@ -25,7 +25,6 @@ defmodule VideoCallWeb.VideoLive.Index do
         <header class="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
           <div>
             <h2 class="font-semibold text-xl tracking-tight">Contacts</h2>
-            <p class="text-xs text-zinc-500">0 people available</p>
           </div>
 
           <button
@@ -67,10 +66,12 @@ defmodule VideoCallWeb.VideoLive.Index do
           />
           <VideoComponents.local_video class={@local_video_class} />
           <VideoComponents.remote_video class={@remote_video_class} />
-          <VideoComponents.controls
-            being_called?={@show_incoming_call_notification?}
-            on_call?={@on_call?}
-          />
+          <div class="mx-auto max-w-[30rem]">
+            <VideoComponents.controls
+              being_called?={@show_incoming_call_notification?}
+              on_call?={@on_call?}
+            />
+          </div>
         </div>
       </div>
 
@@ -363,7 +364,8 @@ defmodule VideoCallWeb.VideoLive.Index do
     |> assign(:show_outgoing_call_notification?, false)
   end
 
-  defp assign_contacts(socket), do: assign(socket, :contacts, Accounts.list_users())
+  defp assign_contacts(%{assigns: %{current_user: user}} = socket),
+    do: assign(socket, :contacts, Contacts.list_contacts(%{user_id: user.id}))
 
   defp assign_video_layout(socket) do
     {:ok,
