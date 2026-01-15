@@ -25,6 +25,9 @@ defmodule VideoCallWeb.VideoLive.Index do
         <header class="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
           <div>
             <h2 class="font-semibold text-xl tracking-tight">Contacts</h2>
+            <p class="text-xs text-zinc-500">
+              {@contacts_count} {if @contacts_count == 1, do: "contact", else: "contacts"}
+            </p>
           </div>
 
           <button
@@ -46,7 +49,7 @@ defmodule VideoCallWeb.VideoLive.Index do
               <.live_component
                 id={"contact-#{contact.id}"}
                 module={ContactComponent}
-                username={contact.username}
+                username={contact.contact_user.username}
               />
             </div>
           </div>
@@ -364,8 +367,13 @@ defmodule VideoCallWeb.VideoLive.Index do
     |> assign(:show_outgoing_call_notification?, false)
   end
 
-  defp assign_contacts(%{assigns: %{current_user: user}} = socket),
-    do: assign(socket, :contacts, Contacts.list_contacts(%{user_id: user.id}))
+  defp assign_contacts(%{assigns: %{current_user: user}} = socket) do
+    contacts = Contacts.list_contacts(%{user_id: user.id})
+
+    socket
+    |> assign(:contacts, contacts)
+    |> assign(:contacts_count, Enum.count(contacts))
+  end
 
   defp assign_video_layout(socket) do
     {:ok,
