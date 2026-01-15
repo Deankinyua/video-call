@@ -3,7 +3,7 @@ defmodule VideoCallWeb.ContactLive.Index do
 
   alias VideoCall.Accounts
   alias VideoCall.Contacts
-  # alias VideoCall.Contacts.Contact
+  alias VideoCallWeb.VideoComponents
 
   @impl Phoenix.LiveView
   def render(assigns) do
@@ -69,15 +69,14 @@ defmodule VideoCallWeb.ContactLive.Index do
             class="flex items-center justify-between p-4 bg-zinc-900/40 border border-white/5 rounded-2xl hover:bg-zinc-900/60 hover:border-emerald-500/30 transition-all duration-300 group"
           >
             <div class="flex items-center gap-4">
-              <div class="h-12 w-12 rounded-full bg-gradient-to-br from-zinc-700 to-zinc-900 border border-white/10 flex items-center justify-center text-zinc-400 font-bold">
-                {String.at(user.username, 0) |> String.upcase()}
+              <div class="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center text-zinc-400 font-bold">
+                <VideoComponents.default_avatar fill="#1A1A1A" />
               </div>
 
               <div>
                 <div class="font-medium text-zinc-100 group-hover:text-emerald-400 transition-colors">
                   {user.username}
                 </div>
-                <div class="text-xs text-zinc-500">Available to connect</div>
               </div>
             </div>
 
@@ -131,10 +130,10 @@ defmodule VideoCallWeb.ContactLive.Index do
   end
 
   @impl Phoenix.LiveView
-  def handle_params(params, _url, socket) do
+  def handle_params(params, _url, %{assigns: %{current_user: user}} = socket) do
     search_query = params["q"] || ""
 
-    users = fetch_users(search_query)
+    users = fetch_users(search_query, user.id)
 
     {:noreply,
      socket
@@ -173,8 +172,9 @@ defmodule VideoCallWeb.ContactLive.Index do
     end
   end
 
-  defp fetch_users(search_query) when search_query != "",
-    do: Accounts.list_users(%{search: search_query})
+  defp fetch_users(search_query, user_id) when search_query != "",
+    do: Accounts.list_users(%{current_user_id: user_id, search: search_query})
 
-  defp fetch_users(_search_query), do: Accounts.list_users()
+  defp fetch_users(_search_query, user_id),
+    do: Accounts.list_users(%{current_user_id: user_id})
 end

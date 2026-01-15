@@ -30,7 +30,20 @@ defmodule VideoCall.Contacts do
   def create_contact(attrs) do
     %Contact{}
     |> Contact.changeset(attrs)
+    |> validate_contact_not_current_user()
     |> Repo.insert()
+  end
+
+  defp validate_contact_not_current_user(
+         %{changes: %{user_id: user_id, contact_user_id: contact_user_id}} = changeset
+       ) do
+    case user_id == contact_user_id do
+      true ->
+        Ecto.Changeset.add_error(changeset, :user_id, "You cannot add yourself as a contact")
+
+      false ->
+        changeset
+    end
   end
 
   @doc """

@@ -21,11 +21,10 @@ defmodule VideoCallWeb.VideoComponents do
       </audio>
       <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
         <div class="relative shrink-0">
-          <img
-            src="/images/default_avatar.jpg"
-            alt={@caller}
-            class="w-14 h-14 rounded-full object-cover border-2 border-white/20"
-          />
+          <div class="w-14 h-14 rounded-full object-cover border-2 border-white/20">
+            <.default_avatar fill="#1A1A1A" />
+          </div>
+
           <span class="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-black/40 animate-pulse">
           </span>
         </div>
@@ -94,12 +93,8 @@ defmodule VideoCallWeb.VideoComponents do
           <div class="absolute w-48 h-48 bg-white/5 rounded-full animate-[ping_3s_linear_infinite]">
           </div>
 
-          <div class="relative w-32 h-32 md:w-40 md:h-40">
-            <img
-              src="/images/default_avatar.jpg"
-              alt="recipient picture"
-              class="w-full h-full rounded-full object-cover border-4 border-white/10 shadow-2xl"
-            />
+          <div class="relative w-32 h-32 rounded-full overflow-hidden md:w-40 md:h-40">
+            <.default_avatar fill="#1A1A1A" />
           </div>
         </div>
 
@@ -337,6 +332,28 @@ defmodule VideoCallWeb.VideoComponents do
         <p class="text-sm font-medium">{@message}</p>
       </div>
     </div>
+    """
+  end
+
+  attr :fill, :string, required: true
+
+  @spec default_avatar(assigns()) :: rendered()
+  def default_avatar(assigns) do
+    ~H"""
+    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+      <g id="SVGRepo_iconCarrier">
+        <path
+          d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
+          fill={@fill}
+        >
+        </path>
+
+        <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill={@fill}>
+        </path>
+      </g>
+    </svg>
     """
   end
 end

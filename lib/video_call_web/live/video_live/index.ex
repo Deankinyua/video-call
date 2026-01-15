@@ -20,7 +20,7 @@ defmodule VideoCallWeb.VideoLive.Index do
     >
       <section
         id="contacts"
-        class="z-[2000] fixed inset-0 sm:absolute sm:inset-auto hidden w-full h-full sm:w-96 sm:h-[600px] sm:top-6 sm:right-6 bg-zinc-900/95 backdrop-blur-xl text-zinc-100 overflow-hidden sm:rounded-2xl sm:border sm:border-white/10 shadow-2xl flex flex-col"
+        class="z-[2000] fixed inset-0 hidden w-full h-full overflow-y-scroll bg-zinc-900/95 backdrop-blur-xl text-zinc-100 shadow-2xl flex flex-col sm:w-96 sm:h-[600px] sm:top-6 sm:right-6 sm:absolute sm:inset-auto sm:rounded-2xl sm:border sm:border-white/10"
       >
         <header class="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
           <div>
@@ -43,7 +43,7 @@ defmodule VideoCallWeb.VideoLive.Index do
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <div class="flex-1 p-4">
           <div class="space-y-1">
             <div :for={contact <- @contacts}>
               <.live_component

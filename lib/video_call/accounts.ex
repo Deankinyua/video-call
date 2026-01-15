@@ -48,6 +48,10 @@ defmodule VideoCall.Accounts do
     end
   end
 
+  defp apply_filter({:current_user_id, current_user_id}, dynamic) do
+    dynamic([user: user], ^dynamic and user.id != ^current_user_id)
+  end
+
   defp apply_filter({:search, search_query}, dynamic),
     do: TextSearchHelpers.apply_filter({:search, search_query}, dynamic)
 
