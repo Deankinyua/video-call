@@ -8,7 +8,7 @@ defmodule VideoCallWeb.ContactLive.Index do
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
-    <div class="h-screen overflow-hidden bg-black text-zinc-100 p-6 sm:p-12">
+    <div class="h-screen relative overflow-hidden bg-black text-zinc-100 p-6 sm:p-12">
       <div class="max-w-2xl mx-auto">
         <header class="mb-10">
           <h1 class="text-3xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">
@@ -61,7 +61,7 @@ defmodule VideoCallWeb.ContactLive.Index do
           :if={!@users_empty?}
           id="users"
           phx-update="stream"
-          class="space-y-3 h-[70vh] overflow-y-scroll"
+          class="space-y-3 h-[60vh] overflow-y-scroll"
         >
           <div
             :for={{dom_id, user} <- @streams.users}
@@ -117,6 +117,16 @@ defmodule VideoCallWeb.ContactLive.Index do
           <p class="text-zinc-500 italic">Ooops!! No users were found.</p>
         </div>
       </div>
+
+      <VideoComponents.successful_contact_addition_notification
+        message={@successful_contact_addition_message}
+        show?={@show_successful_contact_addition_message?}
+      />
+
+      <VideoComponents.failed_contact_addition_notification
+        message={@failed_contact_addition_message}
+        show?={@show_failed_contact_addition_message?}
+      />
     </div>
     """
   end
@@ -126,7 +136,11 @@ defmodule VideoCallWeb.ContactLive.Index do
     {:ok,
      socket
      |> stream_configure(:users, dom_id: &"user-#{&1.id}")
-     |> assign(:search_query, "")}
+     |> assign(:search_query, "")
+     |> assign(:show_failed_contact_addition_message?, false)
+     |> assign(:failed_contact_addition_message, "")
+     |> assign(:show_successful_contact_addition_message?, false)
+     |> assign(:successful_contact_addition_message, "")}
   end
 
   @impl Phoenix.LiveView
@@ -164,13 +178,35 @@ defmodule VideoCallWeb.ContactLive.Index do
     attrs = %{user_id: user.id, contact_user_id: contact_id}
 
     case Contacts.create_contact(attrs) do
-      {:ok, user} ->
-        {:noreply, socket}
+      {:ok, contact} ->
+        contact = Contacts.get_contact(contact.id)
 
-      {:error, changeset} ->
-        {:noreply, socket}
+        {:noreply,
+         socket
+         |> assign(:show_successful_contact_addition_message?, true)
+         |> assign(
+           :successful_contact_addition_message,
+           "#{contact.contact_user.username} was added as a contact"
+         )}
+
+      {:error, _changeset} ->
+        contact = Contacts.get_contact_by_user_id_and_contact_id(contact_id, user.id)
+
+        {:noreply,
+         socket
+         |> assign(:show_failed_contact_addition_message?, true)
+         |> assign(
+           :failed_contact_addition_message,
+           "#{contact.contact_user.username} is already a contact"
+         )}
     end
   end
+
+  def handle_event("animation-finished", %{"target" => "successful-contact-addition"}, socket),
+    do: {:noreply, assign(socket, :show_successful_contact_addition_message?, false)}
+
+  def handle_event("animation-finished", %{"target" => "failed-contact-addition"}, socket),
+    do: {:noreply, assign(socket, :show_failed_contact_addition_message?, false)}
 
   defp fetch_users(search_query, user_id) when search_query != "",
     do: Accounts.list_users(%{current_user_id: user_id, search: search_query})

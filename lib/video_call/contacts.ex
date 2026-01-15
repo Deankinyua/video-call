@@ -13,6 +13,51 @@ defmodule VideoCall.Contacts do
   @type contact :: Contact.t()
   @type contact_id :: Ecto.UUID.t()
   @type filters :: map()
+  @type id :: Ecto.UUID.t()
+
+  @doc """
+  Gets a single contact by id.
+
+  Returns `nil` if the contact does not exist.
+
+  ## Examples
+
+      iex> get_contact("550e8400-e29b-41d4-a716-446655440000")
+      %Contact{}
+
+      iex> get_contact("non-existent-id")
+      nil
+
+  """
+  @spec get_contact(id()) :: contact()
+  def get_contact(id) do
+    Contact
+    |> where([c], c.id == ^id)
+    |> preload([:contact_user])
+    |> Repo.one()
+  end
+
+  @doc """
+  Gets a contact by the contact_user_id and the owner's user_id.
+
+  Returns `nil` if no matching contact is found.
+
+  ## Examples
+
+      iex> get_contact_by_user_id_and_contact_id("550e8400-e29b-41d4-a716-446655440000", "550e8400-e29b-41d4-a676-449955440000")
+      %Contact{}
+
+      iex> get_contact_by_user_id_and_contact_id("non-existent-id", "owner-user-id")
+      nil
+
+  """
+  @spec get_contact_by_user_id_and_contact_id(id(), id()) :: contact()
+  def get_contact_by_user_id_and_contact_id(contact_user_id, user_id) do
+    Contact
+    |> where([c], c.contact_user_id == ^contact_user_id and c.user_id == ^user_id)
+    |> preload([:contact_user])
+    |> Repo.one()
+  end
 
   @doc """
   Creates a contact.
@@ -30,12 +75,13 @@ defmodule VideoCall.Contacts do
   def create_contact(attrs) do
     %Contact{}
     |> Contact.changeset(attrs)
-    |> validate_contact_not_current_user()
+    |> validate_contact_not_current_user(attrs)
     |> Repo.insert()
   end
 
   defp validate_contact_not_current_user(
-         %{changes: %{user_id: user_id, contact_user_id: contact_user_id}} = changeset
+         changeset,
+         %{user_id: user_id, contact_user_id: contact_user_id} = _attrs
        ) do
     case user_id == contact_user_id do
       true ->

@@ -117,6 +117,85 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  attr :message, :string, required: true
+  attr :show?, :boolean, required: true
+
+  @spec successful_contact_addition_notification(assigns()) :: rendered()
+  def successful_contact_addition_notification(assigns) do
+    ~H"""
+    <div
+      :if={@show?}
+      id="successful-contact-addition"
+      class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+      phx-hook="Animation"
+    >
+      <div class="min-w-[16rem] flex items-center gap-3 p-4 rounded-2xl bg-zinc-900 text-zinc-100 shadow-2xl shadow-black/50 border border-emerald-500/20 animate-in fade-in slide-in-from-top-2">
+        <section class="shrink-0 size-8 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="size-5 text-emerald-500"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <line x1="19" y1="8" x2="19" y2="14"></line>
+            <line x1="16" y1="11" x2="22" y2="11"></line>
+          </svg>
+        </section>
+
+        <div class="flex flex-col">
+          <div class="text-[13px] font-semibold text-emerald-400 leading-tight">Contact Added</div>
+          <div class="text-[11px] text-zinc-400 mt-0.5 leading-tight">{@message}</div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  attr :message, :string, required: true
+  attr :show?, :boolean, required: true
+
+  @spec failed_contact_addition_notification(assigns()) :: rendered()
+  def failed_contact_addition_notification(assigns) do
+    ~H"""
+    <div
+      :if={@show?}
+      id="failed-contact-addition"
+      class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
+      phx-hook="Animation"
+    >
+      <div class="min-w-[16rem] flex items-center gap-3 p-4 rounded-2xl bg-zinc-900 text-zinc-100 shadow-2xl shadow-black/50 border border-white/5 animate-in fade-in slide-in-from-top-2">
+        <section class="shrink-0 size-8 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="size-5 text-amber-500"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <polyline points="16 11 18 13 22 9"></polyline>
+          </svg>
+        </section>
+
+        <div class="flex flex-col">
+          <div class="text-[13px] font-semibold text-zinc-100 leading-tight">Already Added</div>
+          <div class="text-[11px] text-zinc-500 mt-0.5 leading-tight">{@message}</div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   attr :being_called?, :boolean, required: true
   attr :on_call?, :boolean, required: true
 
