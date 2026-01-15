@@ -10,7 +10,7 @@ defmodule VideoCallWeb.ContactComponent do
       <section class="flex gap-3 items-center">
         <div class="relative shrink-0">
           <img
-            src="/images/default_avatar.jpg"
+            src="/images/default_avatar.svg"
             alt={@username}
             class="w-12 h-12 rounded-full object-cover ring-2 ring-transparent group-hover:ring-zinc-700 transition-all"
           />

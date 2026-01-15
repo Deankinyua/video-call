@@ -8,7 +8,7 @@ defmodule VideoCallWeb.ContactLive.Index do
   @impl Phoenix.LiveView
   def render(assigns) do
     ~H"""
-    <div class="min-h-screen bg-black text-zinc-100 p-6 sm:p-12">
+    <div class="h-screen overflow-hidden bg-black text-zinc-100 p-6 sm:p-12">
       <div class="max-w-2xl mx-auto">
         <header class="mb-10">
           <h1 class="text-3xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">
@@ -57,7 +57,12 @@ defmodule VideoCallWeb.ContactLive.Index do
           </form>
         </div>
 
-        <section id="users" phx-update="stream" class="space-y-3">
+        <section
+          :if={!@users_empty?}
+          id="users"
+          phx-update="stream"
+          class="space-y-3 h-[70vh] overflow-y-scroll"
+        >
           <div
             :for={{dom_id, user} <- @streams.users}
             id={dom_id}
@@ -93,7 +98,7 @@ defmodule VideoCallWeb.ContactLive.Index do
           </div>
         </section>
 
-        <div :if={Enum.count(@streams.users) == 0} class="text-center py-20">
+        <div :if={@users_empty?} class="text-center py-20">
           <div class="inline-flex items-center justify-center h-16 w-16 rounded-full bg-zinc-900 text-zinc-700 mb-4">
             <svg
               xmlns="http://www.w3.org/2000/svg"

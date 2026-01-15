@@ -29,6 +29,8 @@ if System.get_env("PHX_SERVER") do
 
   # * We won't need to provide the url configuration in prod environment since we already set it here
   config :video_call, VideoCallWeb.Endpoint,
+    # * The mix phx.server task automatically sets this to true but
+    # * since mix is not available in releases we have to manually set it
     server: true,
     url: [host: host, port: 443, scheme: "https"]
 end
