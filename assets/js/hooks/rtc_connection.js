@@ -6,6 +6,9 @@ RtcConnectionHooks.RtcConnection = {
     this.localVideoEl = document.querySelector("#local-video");
     this.remoteVideoEl = document.querySelector("#remote-video");
 
+    this.localVideoEl.volume = 0;
+    this.remoteVideoEl.volume = 0;
+
     this.localStream;
     this.remoteStream;
     this.peerConnection;
@@ -115,19 +118,11 @@ RtcConnectionHooks.RtcConnection = {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: {
-            volume: 1.0,
-            channelCount: 1,
             autoGainControl: false,
-            googAutoGainControl: false,
             echoCancellation: false,
             noiseSuppression: false,
           },
         });
-
-        const supported = navigator.mediaDevices.getSupportedConstraints();
-
-        console.log("Supported constraints include: ");
-        console.log(supported);
 
         this.localVideoEl.srcObject = stream;
         this.localStream = stream;
@@ -191,6 +186,11 @@ RtcConnectionHooks.RtcConnection = {
 
         if (pc.connectionState === "connected") {
           this.pushEvent("peer_connection_connected", {});
+
+          // * increase the volume to one now that they are connected
+          setTimeout(() => {
+            this.remoteVideoEl.volume = 1;
+          }, 1000);
         }
 
         console.log("Connection State:", pc.connectionState);
