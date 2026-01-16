@@ -19,6 +19,7 @@ defmodule VideoCallWeb.ContactLive.Components do
     ~H"""
     <form
       phx-submit="search_submit"
+      phx-change="search_submit"
       class="relative flex items-center bg-zinc-900 border border-white/10 rounded-xl overflow-hidden focus-within:border-emerald-500/50 transition-all"
     >
       <div class="pl-4 text-zinc-500">
@@ -43,8 +44,9 @@ defmodule VideoCallWeb.ContactLive.Components do
         type="text"
         name="query"
         value={@search_query}
-        placeholder="Type friend's username..."
+        placeholder="Start typing friend's username..."
         class="w-full pl-3 pr-4 py-4 bg-transparent border-0 focus:ring-0 text-base placeholder-zinc-600 text-white"
+        phx-debounce="300"
       />
 
       <button class="mr-3 px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-white/5 rounded-lg text-xs font-semibold transition-colors">
@@ -193,11 +195,11 @@ defmodule VideoCallWeb.ContactLive.Components do
       height="25px"
       viewBox="0 0 1024 1024"
       xmlns="http://www.w3.org/2000/svg"
-      fill="#000000"
+      fill="#ffffff"
     >
-      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-      <g id="SVGRepo_iconCarrier">
+      <g id="SVGRepo_bgCarrier-2" stroke-width="0"></g>
+      <g id="SVGRepo_tracerCarrier-2" stroke-linecap="round" stroke-linejoin="round"></g>
+      <g id="SVGRepo_iconCarrier-2">
         <path fill="#ffffff" d="M224 480h640a32 32 0 1 1 0 64H224a32 32 0 0 1 0-64z"></path>
         <path
           fill="#ffffff"

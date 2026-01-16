@@ -10,7 +10,7 @@ defmodule VideoCallWeb.ContactLive.Index do
   def render(assigns) do
     ~H"""
     <div class="h-screen relative overflow-hidden bg-black text-zinc-100 p-6 sm:p-12">
-      <button phx-click={JS.navigate(~p"/")}>
+      <button phx-click={JS.navigate(~p"/")} class="mb-6">
         <.back_button />
       </button>
 

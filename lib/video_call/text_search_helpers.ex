@@ -33,10 +33,17 @@ defmodule VideoCall.TextSearchHelpers do
       when is_binary(search_query) and search_query != "" do
     # Use PostgreSQL websearch_to_tsquery for better search experience
     # websearch_to_tsquery handles phrases, AND/OR operators naturally
+
+    formatted_query =
+      search_query
+      |> String.split()
+      |> Enum.map(&"#{&1}:*")
+      |> Enum.join(" & ")
+
     dynamic(
       [user: user],
       ^dynamic and
-        fragment("? @@ websearch_to_tsquery('english', ?)", user.search_vector, ^search_query)
+        fragment("? @@ to_tsquery('english', ?)", user.search_vector, ^formatted_query)
     )
   end
 
