@@ -46,7 +46,7 @@ defmodule VideoCallWeb.ContactLive.Components do
         value={@search_query}
         placeholder="Start typing friend's username..."
         class="w-full pl-3 pr-4 py-4 bg-transparent border-0 focus:ring-0 text-base placeholder-zinc-600 text-white"
-        phx-debounce="300"
+        phx-debounce="500"
       />
 
       <button class="mr-3 px-4 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-white/5 rounded-lg text-xs font-semibold transition-colors">

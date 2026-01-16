@@ -185,7 +185,11 @@ defmodule VideoCallWeb.VideoLive.Components do
   @spec link_to_contacts(assigns()) :: rendered()
   def link_to_contacts(assigns) do
     ~H"""
-    <div class="group w-max cursor-pointer ml-8 sm:ml-20" phx-click={JS.navigate(~p"/contacts")}>
+    <button
+      phx-click={JS.navigate(~p"/contacts")}
+      class="group w-max cursor-pointer ml-8 sm:ml-20 disabled:opacity-50 disabled:cursor-not-allowed"
+      disabled={@being_called? || @on_call?}
+    >
       <div class="relative flex items-center gap-3 px-6 py-[10px] rounded-full bg-zinc-950 border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +209,7 @@ defmodule VideoCallWeb.VideoLive.Components do
         <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none">
         </div>
       </div>
-    </div>
+    </button>
     """
   end
 
@@ -259,7 +263,7 @@ defmodule VideoCallWeb.VideoLive.Components do
     <div class="w-max mx-auto px-4 mt-6 pt-4 flex gap-4 items-center">
       <.show_contacts_button being_called?={@being_called?} on_call?={@on_call?} />
       <.end_call_button being_called?={@being_called?} on_call?={@on_call?} />
-      <.link_to_contacts />
+      <.link_to_contacts being_called?={@being_called?} on_call?={@on_call?} />
     </div>
     """
   end

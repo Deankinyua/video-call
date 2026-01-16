@@ -37,8 +37,7 @@ defmodule VideoCall.TextSearchHelpers do
     formatted_query =
       search_query
       |> String.split()
-      |> Enum.map(&"#{&1}:*")
-      |> Enum.join(" & ")
+      |> Enum.map_join(" & ", &"#{&1}:*")
 
     dynamic(
       [user: user],
