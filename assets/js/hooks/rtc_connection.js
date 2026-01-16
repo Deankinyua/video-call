@@ -124,6 +124,11 @@ RtcConnectionHooks.RtcConnection = {
           },
         });
 
+        const supported = navigator.mediaDevices.getSupportedConstraints();
+
+        console.log("Supported constraints include: ");
+        console.log(supported);
+
         this.localVideoEl.srcObject = stream;
         this.localStream = stream;
         resolve();
