@@ -67,9 +67,9 @@ defmodule VideoCallWeb.ContactLive.Index do
     {:ok,
      socket
      |> stream_configure(:users, dom_id: &"user-#{&1.id}")
+     |> assign(:failed_contact_addition_message, "")
      |> assign(:search_query, "")
      |> assign(:show_failed_contact_addition_message?, false)
-     |> assign(:failed_contact_addition_message, "")
      |> assign(:show_successful_contact_addition_message?, false)
      |> assign(:successful_contact_addition_message, "")}
   end
@@ -125,11 +125,11 @@ defmodule VideoCallWeb.ContactLive.Index do
 
         {:noreply,
          socket
-         |> assign(:show_failed_contact_addition_message?, true)
          |> assign(
            :failed_contact_addition_message,
            "#{contact.contact_user.username} is already a contact"
-         )}
+         )
+         |> assign(:show_failed_contact_addition_message?, true)}
     end
   end
 
