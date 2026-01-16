@@ -1,9 +1,8 @@
 defmodule VideoCallWeb.ContactComponent do
   @moduledoc false
-
   use VideoCallWeb, :live_component
 
-  alias VideoCallWeb.VideoComponents
+  import VideoCallWeb.Components
 
   @impl Phoenix.LiveComponent
   def render(assigns) do
@@ -12,7 +11,7 @@ defmodule VideoCallWeb.ContactComponent do
       <section class="flex gap-3 items-center">
         <div class="relative shrink-0">
           <div class="w-12 h-12 rounded-full overflow-hidden object-cover ring-2 ring-transparent group-hover:ring-zinc-700 transition-all">
-            <VideoComponents.default_avatar fill="#000000" />
+            <.default_avatar fill="#000000" />
           </div>
 
           <span class="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 ring-2 ring-zinc-900">

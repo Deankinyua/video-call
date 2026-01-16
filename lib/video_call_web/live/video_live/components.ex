@@ -1,7 +1,11 @@
-defmodule VideoCallWeb.VideoComponents do
-  @moduledoc false
+defmodule VideoCallWeb.VideoLive.Components do
+  @moduledoc """
+  Contains all components rendered in the video liveview
+  """
 
   use VideoCallWeb, :html
+
+  import VideoCallWeb.Components
 
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
@@ -21,7 +25,7 @@ defmodule VideoCallWeb.VideoComponents do
       </audio>
       <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
         <div class="relative shrink-0">
-          <div class="w-14 h-14 rounded-full object-cover border-2 border-white/20">
+          <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20">
             <.default_avatar fill="#1A1A1A" />
           </div>
 
@@ -117,85 +121,6 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
-  attr :message, :string, required: true
-  attr :show?, :boolean, required: true
-
-  @spec successful_contact_addition_notification(assigns()) :: rendered()
-  def successful_contact_addition_notification(assigns) do
-    ~H"""
-    <div
-      :if={@show?}
-      id="successful-contact-addition"
-      class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
-      phx-hook="Animation"
-    >
-      <div class="min-w-[16rem] flex items-center gap-3 p-4 rounded-2xl bg-zinc-900 text-zinc-100 shadow-2xl shadow-black/50 border border-emerald-500/20 animate-in fade-in slide-in-from-top-2">
-        <section class="shrink-0 size-8 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="size-5 text-emerald-500"
-          >
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <line x1="19" y1="8" x2="19" y2="14"></line>
-            <line x1="16" y1="11" x2="22" y2="11"></line>
-          </svg>
-        </section>
-
-        <div class="flex flex-col">
-          <div class="text-[13px] font-semibold text-emerald-400 leading-tight">Contact Added</div>
-          <div class="text-[11px] text-zinc-400 mt-0.5 leading-tight">{@message}</div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  attr :message, :string, required: true
-  attr :show?, :boolean, required: true
-
-  @spec failed_contact_addition_notification(assigns()) :: rendered()
-  def failed_contact_addition_notification(assigns) do
-    ~H"""
-    <div
-      :if={@show?}
-      id="failed-contact-addition"
-      class="fixed bottom-[16vh] left-1/2 -translate-x-1/2 z-[1100] animate-toast"
-      phx-hook="Animation"
-    >
-      <div class="min-w-[16rem] flex items-center gap-3 p-4 rounded-2xl bg-zinc-900 text-zinc-100 shadow-2xl shadow-black/50 border border-white/5 animate-in fade-in slide-in-from-top-2">
-        <section class="shrink-0 size-8 bg-amber-500/10 rounded-full flex items-center justify-center border border-amber-500/20">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="size-5 text-amber-500"
-          >
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <polyline points="16 11 18 13 22 9"></polyline>
-          </svg>
-        </section>
-
-        <div class="flex flex-col">
-          <div class="text-[13px] font-semibold text-zinc-100 leading-tight">Already Added</div>
-          <div class="text-[11px] text-zinc-500 mt-0.5 leading-tight">{@message}</div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   attr :being_called?, :boolean, required: true
   attr :on_call?, :boolean, required: true
 
@@ -260,7 +185,7 @@ defmodule VideoCallWeb.VideoComponents do
   @spec link_to_contacts(assigns()) :: rendered()
   def link_to_contacts(assigns) do
     ~H"""
-    <div class="group w-max cursor-pointer ml-8 sm:ml-20" phx-click={JS.patch(~p"/contacts")}>
+    <div class="group w-max cursor-pointer ml-8 sm:ml-20" phx-click={JS.navigate(~p"/contacts")}>
       <div class="relative flex items-center gap-3 px-6 py-[10px] rounded-full bg-zinc-950 border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -411,28 +336,6 @@ defmodule VideoCallWeb.VideoComponents do
         <p class="text-sm font-medium">{@message}</p>
       </div>
     </div>
-    """
-  end
-
-  attr :fill, :string, required: true
-
-  @spec default_avatar(assigns()) :: rendered()
-  def default_avatar(assigns) do
-    ~H"""
-    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-      <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-      <g id="SVGRepo_iconCarrier">
-        <path
-          d="M8 7C9.65685 7 11 5.65685 11 4C11 2.34315 9.65685 1 8 1C6.34315 1 5 2.34315 5 4C5 5.65685 6.34315 7 8 7Z"
-          fill={@fill}
-        >
-        </path>
-
-        <path d="M14 12C14 10.3431 12.6569 9 11 9H5C3.34315 9 2 10.3431 2 12V15H14V12Z" fill={@fill}>
-        </path>
-      </g>
-    </svg>
     """
   end
 end

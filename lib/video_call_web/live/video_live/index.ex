@@ -1,11 +1,12 @@
 defmodule VideoCallWeb.VideoLive.Index do
   use VideoCallWeb, :live_view
 
+  import VideoCallWeb.VideoLive.Components
+
   alias VideoCall.Calls
   alias VideoCall.Contacts
   alias VideoCall.WebrtcServer
   alias VideoCallWeb.ContactComponent
-  alias VideoCallWeb.VideoComponents
 
   @larger_video_classes "w-full h-[72vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden md:h-[80vh]"
   @smaller_video_classes "w-[9rem] max-w-[20rem] h-[28vh] z-30 absolute bottom-[9vh] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:w-[40%] lg:w-[46%] sm:bottom-[12vh]"
@@ -39,7 +40,7 @@ defmodule VideoCallWeb.VideoLive.Index do
             }
             class="p-2 hover:bg-white/10 rounded-full transition-colors"
           >
-            <VideoComponents.close_contacts_button />
+            <.close_contacts_button />
           </button>
         </header>
 
@@ -56,34 +57,25 @@ defmodule VideoCallWeb.VideoLive.Index do
         </div>
       </section>
 
-      <VideoComponents.outgoing_call_notification
-        callee={@peer_2}
-        show?={@show_outgoing_call_notification?}
-      />
+      <.outgoing_call_notification callee={@peer_2} show?={@show_outgoing_call_notification?} />
 
       <div class="py-10 px-4">
         <div id="videos" class="relative">
-          <VideoComponents.incoming_call_notification
-            caller={@peer_2}
-            show?={@show_incoming_call_notification?}
-          />
-          <VideoComponents.local_video class={@local_video_class} />
-          <VideoComponents.remote_video class={@remote_video_class} />
+          <.incoming_call_notification caller={@peer_2} show?={@show_incoming_call_notification?} />
+          <.local_video class={@local_video_class} />
+          <.remote_video class={@remote_video_class} />
           <div class="mx-auto max-w-[30rem]">
-            <VideoComponents.controls
-              being_called?={@show_incoming_call_notification?}
-              on_call?={@on_call?}
-            />
+            <.controls being_called?={@show_incoming_call_notification?} on_call?={@on_call?} />
           </div>
         </div>
       </div>
 
-      <VideoComponents.call_declined_notification
+      <.call_declined_notification
         message={@call_declined_message}
         show?={@show_call_declined_notification?}
       />
 
-      <VideoComponents.call_termination_notification
+      <.call_termination_notification
         message={@call_termination_message}
         show?={@show_call_termination_message?}
       />
