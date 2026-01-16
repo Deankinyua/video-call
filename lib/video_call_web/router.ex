@@ -46,6 +46,7 @@ defmodule VideoCallWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{VideoCallWeb.UserAuth, :ensure_authenticated}] do
       live "/", VideoLive.Index, :index
+      live "/contacts", ContactLive.Index, :index
     end
   end
 

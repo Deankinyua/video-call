@@ -1,7 +1,11 @@
-defmodule VideoCallWeb.VideoComponents do
-  @moduledoc false
+defmodule VideoCallWeb.VideoLive.Components do
+  @moduledoc """
+  Contains all components rendered in the video liveview
+  """
 
   use VideoCallWeb, :html
+
+  import VideoCallWeb.Components
 
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
@@ -14,6 +18,7 @@ defmodule VideoCallWeb.VideoComponents do
     ~H"""
     <div
       :if={@show?}
+      id="incoming-call-notification"
       class="w-[86%] max-w-[22rem] absolute top-6 left-[6%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
       phx-mounted={JS.hide(to: "#contacts")}
     >
@@ -21,11 +26,10 @@ defmodule VideoCallWeb.VideoComponents do
       </audio>
       <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
         <div class="relative shrink-0">
-          <img
-            src="/images/default_avatar.jpg"
-            alt={@caller}
-            class="w-14 h-14 rounded-full object-cover border-2 border-white/20"
-          />
+          <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20">
+            <.default_avatar fill="#1A1A1A" />
+          </div>
+
           <span class="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-black/40 animate-pulse">
           </span>
         </div>
@@ -94,12 +98,8 @@ defmodule VideoCallWeb.VideoComponents do
           <div class="absolute w-48 h-48 bg-white/5 rounded-full animate-[ping_3s_linear_infinite]">
           </div>
 
-          <div class="relative w-32 h-32 md:w-40 md:h-40">
-            <img
-              src="/images/default_avatar.jpg"
-              alt="recipient picture"
-              class="w-full h-full rounded-full object-cover border-4 border-white/10 shadow-2xl"
-            />
+          <div class="relative w-32 h-32 rounded-full overflow-hidden md:w-40 md:h-40">
+            <.default_avatar fill="#1A1A1A" />
           </div>
         </div>
 
@@ -183,6 +183,37 @@ defmodule VideoCallWeb.VideoComponents do
     """
   end
 
+  @spec link_to_contacts(assigns()) :: rendered()
+  def link_to_contacts(assigns) do
+    ~H"""
+    <button
+      phx-click={JS.navigate(~p"/contacts")}
+      class="group w-max cursor-pointer ml-8 sm:ml-20 disabled:opacity-50 disabled:cursor-not-allowed"
+      disabled={@being_called? || @on_call?}
+    >
+      <div class="relative flex items-center gap-3 px-6 py-[10px] rounded-full bg-zinc-950 border border-emerald-500/30 hover:border-emerald-400 transition-all duration-300 shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_rgba(16,185,129,0.2)]">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5 text-emerald-500 group-hover:scale-110 transition-transform"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2.5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+
+        <span class="text-sm font-semibold tracking-wide text-zinc-100 group-hover:text-white">
+          Add Contacts
+        </span>
+
+        <div class="absolute inset-0 rounded-full bg-gradient-to-b from-white/5 to-transparent pointer-events-none">
+        </div>
+      </div>
+    </button>
+    """
+  end
+
   @spec close_contacts_button(assigns()) :: rendered()
   def close_contacts_button(assigns) do
     ~H"""
@@ -230,9 +261,10 @@ defmodule VideoCallWeb.VideoComponents do
   @spec controls(assigns()) :: rendered()
   def controls(assigns) do
     ~H"""
-    <div class="w-max mx-auto bg-[#1b1c1d] rounded-3xl px-4 mt-6 pt-4 py-2 flex gap-4">
+    <div class="w-max mx-auto px-4 mt-6 pt-4 flex gap-4 items-center">
       <.show_contacts_button being_called?={@being_called?} on_call?={@on_call?} />
       <.end_call_button being_called?={@being_called?} on_call?={@on_call?} />
+      <.link_to_contacts being_called?={@being_called?} on_call?={@on_call?} />
     </div>
     """
   end
@@ -255,7 +287,7 @@ defmodule VideoCallWeb.VideoComponents do
       phx-hook="Animation"
     >
       <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
-        <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
+        <section class="size-7 bg-[#E53935] rounded-full flex items-center shrink-0 justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
             <path
               d="M6 6L18 18M18 6L6 18"
@@ -268,7 +300,7 @@ defmodule VideoCallWeb.VideoComponents do
           </svg>
         </section>
 
-        <div class="text-sm font-medium">{@message}</div>
+        <div class="text-xs font-medium sm:text-sm">{@message}</div>
       </div>
     </div>
     """
@@ -292,7 +324,7 @@ defmodule VideoCallWeb.VideoComponents do
       phx-hook="Animation"
     >
       <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
+        <section class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -305,8 +337,8 @@ defmodule VideoCallWeb.VideoComponents do
               clip-rule="evenodd"
             />
           </svg>
-        </span>
-        <p class="text-sm font-medium">{@message}</p>
+        </section>
+        <p class="text-xs font-medium sm:text-sm">{@message}</p>
       </div>
     </div>
     """

@@ -16,10 +16,26 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
+
+# * This configuration will be invoked for all environments.
+# * If we use make iex_server to start the server locally, it will behave like production env since this variables will be provided by ngrok
 if System.get_env("PHX_SERVER") do
-  config :video_call, VideoCallWeb.Endpoint, server: true
+  host =
+    System.get_env("PHX_HOST") ||
+      raise """
+      environment variable PHX_HOST is missing.
+      #{if config_env() == :dev, do: "Run `make server` to start with ngrok."}
+      """
+
+  # * We won't need to provide the url configuration in prod environment since we already set it here
+  config :video_call, VideoCallWeb.Endpoint,
+    # * The mix phx.server task automatically sets this to true but
+    # * since mix is not available in releases we have to manually set it
+    server: true,
+    url: [host: host, port: 443, scheme: "https"]
 end
 
+# * This configuration will be invoked for the production environment only
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||
@@ -48,13 +64,11 @@ if config_env() == :prod do
       You can generate one by calling: mix phx.gen.secret
       """
 
-  host = System.get_env("PHX_HOST") || "example.com"
   port = String.to_integer(System.get_env("PORT") || "4000")
 
   config :video_call, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :video_call, VideoCallWeb.Endpoint,
-    url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.
       # Set it to  {0, 0, 0, 0, 0, 0, 0, 1} for local network only access.

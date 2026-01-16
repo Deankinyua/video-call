@@ -4,9 +4,12 @@ defmodule VideoCall.AccountsFixtures do
   entities via the `VideoCall.Accounts` context.
   """
 
+  import VideoCall.PaginationHelpers
+
   alias VideoCall.Accounts.User
 
   @type attrs :: map()
+  @type user :: User.t()
 
   @doc """
   Generate a unique user email.
@@ -20,7 +23,7 @@ defmodule VideoCall.AccountsFixtures do
   @doc """
   Generate a user.
   """
-  @spec user_fixture(attrs()) :: User.t()
+  @spec user_fixture(attrs()) :: user()
   def user_fixture(attrs \\ %{}) do
     {:ok, user} =
       attrs
@@ -32,5 +35,14 @@ defmodule VideoCall.AccountsFixtures do
       |> VideoCall.Accounts.register_user()
 
     user
+  end
+
+  @spec create_multiple_users(integer()) :: [user()]
+  def create_multiple_users(number_of_users) do
+    for index <- 1..number_of_users do
+      offset_time = 120 * index
+
+      update_inserted_at(user_fixture(), offset_time)
+    end
   end
 end

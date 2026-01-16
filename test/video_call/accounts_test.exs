@@ -68,11 +68,11 @@ defmodule VideoCall.AccountsTest do
     end
 
     test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "not valid"})
+      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "nod"})
 
       assert %{
                email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 12 character(s)"]
+               password: ["should be at least 5 character(s)"]
              } = errors_on(changeset)
     end
 
@@ -182,5 +182,28 @@ defmodule VideoCall.AccountsTest do
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
     end
+  end
+
+  describe "list_users/1" do
+    test "returns a list of all users when no filter is passed" do
+      _users = create_multiple_users(5)
+      all_users = Accounts.list_users()
+
+      assert length(all_users) == 5
+    end
+  end
+
+  test "returns an empty list when there are no users" do
+    assert [] = Accounts.list_users()
+  end
+
+  test "returns only relevant users when searching" do
+    _users = create_multiple_users(5)
+    relevant_user = user_fixture(%{username: "dean"})
+    users = Accounts.list_users(%{search: "Dean"})
+
+    assert length(users) == 1
+    only_user = Enum.at(users, 0)
+    assert relevant_user.id == only_user.id
   end
 end

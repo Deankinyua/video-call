@@ -1,11 +1,12 @@
 defmodule VideoCallWeb.VideoLive.Index do
   use VideoCallWeb, :live_view
 
-  alias VideoCall.Accounts
+  import VideoCallWeb.VideoLive.Components
+
   alias VideoCall.Calls
+  alias VideoCall.Contacts
   alias VideoCall.WebrtcServer
   alias VideoCallWeb.ContactComponent
-  alias VideoCallWeb.VideoComponents
 
   @larger_video_classes "w-full h-[72vh] max-w-[30rem] mx-auto rounded-lg overflow-hidden md:h-[80vh]"
   @smaller_video_classes "w-[9rem] max-w-[20rem] h-[28vh] z-30 absolute bottom-[9vh] right-[1rem] rounded-lg overflow-hidden sm:h-[22vh] sm:w-[40%] lg:w-[46%] sm:bottom-[12vh]"
@@ -20,12 +21,14 @@ defmodule VideoCallWeb.VideoLive.Index do
     >
       <section
         id="contacts"
-        class="z-[2000] fixed inset-0 sm:absolute sm:inset-auto hidden w-full h-full sm:w-96 sm:h-[600px] sm:top-6 sm:right-6 bg-zinc-900/95 backdrop-blur-xl text-zinc-100 overflow-hidden sm:rounded-2xl sm:border sm:border-white/10 shadow-2xl flex flex-col"
+        class="z-[2000] fixed inset-0 hidden w-full h-full overflow-y-scroll bg-zinc-900/95 backdrop-blur-xl text-zinc-100 shadow-2xl flex flex-col sm:w-96 sm:h-[600px] sm:top-6 sm:right-6 sm:absolute sm:inset-auto sm:rounded-2xl sm:border sm:border-white/10"
       >
         <header class="p-5 border-b border-white/5 flex justify-between items-center bg-zinc-900/50">
           <div>
             <h2 class="font-semibold text-xl tracking-tight">Contacts</h2>
-            <p class="text-xs text-zinc-500">0 people available</p>
+            <p class="text-xs text-zinc-500">
+              {@contacts_count} {if @contacts_count == 1, do: "contact", else: "contacts"}
+            </p>
           </div>
 
           <button
@@ -37,49 +40,42 @@ defmodule VideoCallWeb.VideoLive.Index do
             }
             class="p-2 hover:bg-white/10 rounded-full transition-colors"
           >
-            <VideoComponents.close_contacts_button />
+            <.close_contacts_button />
           </button>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <div class="flex-1 p-4">
           <div class="space-y-1">
             <div :for={contact <- @contacts}>
               <.live_component
                 id={"contact-#{contact.id}"}
                 module={ContactComponent}
-                username={contact.username}
+                username={contact.contact_user.username}
               />
             </div>
           </div>
         </div>
       </section>
 
-      <VideoComponents.outgoing_call_notification
-        callee={@peer_2}
-        show?={@show_outgoing_call_notification?}
-      />
+      <.outgoing_call_notification callee={@peer_2} show?={@show_outgoing_call_notification?} />
 
       <div class="py-10 px-4">
         <div id="videos" class="relative">
-          <VideoComponents.incoming_call_notification
-            caller={@peer_2}
-            show?={@show_incoming_call_notification?}
-          />
-          <VideoComponents.local_video class={@local_video_class} />
-          <VideoComponents.remote_video class={@remote_video_class} />
-          <VideoComponents.controls
-            being_called?={@show_incoming_call_notification?}
-            on_call?={@on_call?}
-          />
+          <.incoming_call_notification caller={@peer_2} show?={@show_incoming_call_notification?} />
+          <.local_video class={@local_video_class} />
+          <.remote_video class={@remote_video_class} />
+          <div class="mx-auto max-w-[30rem]">
+            <.controls being_called?={@show_incoming_call_notification?} on_call?={@on_call?} />
+          </div>
         </div>
       </div>
 
-      <VideoComponents.call_declined_notification
+      <.call_declined_notification
         message={@call_declined_message}
         show?={@show_call_declined_notification?}
       />
 
-      <VideoComponents.call_termination_notification
+      <.call_termination_notification
         message={@call_termination_message}
         show?={@show_call_termination_message?}
       />
@@ -363,7 +359,13 @@ defmodule VideoCallWeb.VideoLive.Index do
     |> assign(:show_outgoing_call_notification?, false)
   end
 
-  defp assign_contacts(socket), do: assign(socket, :contacts, Accounts.list_users())
+  defp assign_contacts(%{assigns: %{current_user: user}} = socket) do
+    contacts = Contacts.list_contacts(%{user_id: user.id})
+
+    socket
+    |> assign(:contacts, contacts)
+    |> assign(:contacts_count, Enum.count(contacts))
+  end
 
   defp assign_video_layout(socket) do
     {:ok,
