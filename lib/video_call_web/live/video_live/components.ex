@@ -18,6 +18,7 @@ defmodule VideoCallWeb.VideoLive.Components do
     ~H"""
     <div
       :if={@show?}
+      id="incoming-call-notification"
       class="w-[86%] max-w-[22rem] absolute top-6 left-[6%] z-50 animate-in fade-in slide-in-from-top-4 duration-300 left-medium"
       phx-mounted={JS.hide(to: "#contacts")}
     >
@@ -286,7 +287,7 @@ defmodule VideoCallWeb.VideoLive.Components do
       phx-hook="Animation"
     >
       <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
-        <section class="size-7 bg-[#E53935] rounded-full flex items-center justify-center">
+        <section class="size-7 bg-[#E53935] rounded-full flex items-center shrink-0 justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="size-5">
             <path
               d="M6 6L18 18M18 6L6 18"
@@ -299,7 +300,7 @@ defmodule VideoCallWeb.VideoLive.Components do
           </svg>
         </section>
 
-        <div class="text-sm font-medium">{@message}</div>
+        <div class="text-xs font-medium sm:text-sm">{@message}</div>
       </div>
     </div>
     """
@@ -323,7 +324,7 @@ defmodule VideoCallWeb.VideoLive.Components do
       phx-hook="Animation"
     >
       <div class="min-w-[14rem] flex items-center gap-3 p-3 rounded-xl bg-[#1E1F24] text-[#ffffff] shadow-lg shadow-black/30 border border-[#2a2b30]">
-        <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
+        <section class="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-[#1E6FD9]">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
@@ -336,8 +337,8 @@ defmodule VideoCallWeb.VideoLive.Components do
               clip-rule="evenodd"
             />
           </svg>
-        </span>
-        <p class="text-sm font-medium">{@message}</p>
+        </section>
+        <p class="text-xs font-medium sm:text-sm">{@message}</p>
       </div>
     </div>
     """
