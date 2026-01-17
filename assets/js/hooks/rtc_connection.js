@@ -119,7 +119,7 @@ RtcConnectionHooks.RtcConnection = {
           video: true,
           audio: {
             autoGainControl: false,
-            echoCancellation: false,
+            echoCancellation: "remote-only",
             noiseSuppression: false,
           },
         });
