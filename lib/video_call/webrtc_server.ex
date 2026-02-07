@@ -3,56 +3,51 @@ defmodule VideoCall.WebrtcServer do
   Holds call information used by the 2 peers
   """
 
-  use GenServer
+  use GenServer, restart: :transient
 
   alias VideoCall.Calls
+  alias VideoCall.SignallingRegistry
 
   @type answerer :: Ecto.UUID.t()
   @type candidate_type :: atom()
+  @type genserver :: String.t()
   @type ice_user_id :: Ecto.UUID.t()
   @type offer_obj :: map()
   @type offer_obj_id :: String.t()
   @type offerer :: Ecto.UUID.t()
 
   @spec start_link(any()) :: GenServer.on_start()
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, %{offers: %{}}, opts)
   end
 
   @impl GenServer
-  def init(_state) do
-    {:ok, %{offers: %{}}}
-  end
+  def init(state), do: {:ok, state}
 
-  @spec store_offer(map()) :: :ok
-  def store_offer(offer_object) do
-    GenServer.call(__MODULE__, {:new_offer, offer_object})
-  end
+  @spec store_offer(genserver(), map()) :: :ok
+  def store_offer(genserver, offer_object),
+    do: make_genserver_request(genserver, :call, {:new_offer, offer_object})
 
-  @spec update_offer(offer_obj_id(), answerer()) :: offer_obj()
-  def update_offer(offer_obj_id, answerer) do
-    GenServer.call(__MODULE__, {:update_offer, offer_obj_id, answerer})
-  end
+  @spec update_offer(genserver(), offer_obj_id(), answerer()) :: offer_obj()
+  def update_offer(genserver, offer_obj_id, answerer),
+    do: make_genserver_request(genserver, :call, {:update_offer, offer_obj_id, answerer})
 
-  @spec get_candidates(offer_obj_id(), candidate_type()) :: list()
-  def get_candidates(offer_obj_id, candidate_type) do
-    GenServer.call(__MODULE__, {:get_candidates, offer_obj_id, candidate_type})
-  end
+  @spec get_candidates(genserver(), offer_obj_id(), candidate_type()) :: list()
+  def get_candidates(genserver, offer_obj_id, candidate_type),
+    do: make_genserver_request(genserver, :call, {:get_candidates, offer_obj_id, candidate_type})
 
-  @spec add_offerer_candidate(ice_user_id(), any()) :: :ok
-  def add_offerer_candidate(ice_user_id, candidate) do
-    GenServer.cast(__MODULE__, {:add_offerer_candidate, ice_user_id, candidate})
-  end
+  @spec add_offerer_candidate(genserver(), ice_user_id(), any()) :: :ok
+  def add_offerer_candidate(genserver, ice_user_id, candidate),
+    do: make_genserver_request(genserver, :cast, {:add_offerer_candidate, ice_user_id, candidate})
 
-  @spec add_answerer_candidate(ice_user_id(), any()) :: :ok
-  def add_answerer_candidate(ice_user_id, candidate) do
-    GenServer.cast(__MODULE__, {:add_answerer_candidate, ice_user_id, candidate})
-  end
+  @spec add_answerer_candidate(genserver(), ice_user_id(), any()) :: :ok
+  def add_answerer_candidate(genserver, ice_user_id, candidate),
+    do:
+      make_genserver_request(genserver, :cast, {:add_answerer_candidate, ice_user_id, candidate})
 
-  @spec clear_offer_object(offer_obj_id()) :: :ok
-  def clear_offer_object(offer_obj_id) do
-    GenServer.cast(__MODULE__, {:clear_offer_object, offer_obj_id})
-  end
+  @spec clear_offer_object(genserver(), offer_obj_id()) :: :ok
+  def clear_offer_object(genserver, offer_obj_id),
+    do: make_genserver_request(genserver, :cast, {:clear_offer_object, offer_obj_id})
 
   @impl GenServer
   def handle_call({:new_offer, offer_object}, _from, state) do
@@ -133,4 +128,18 @@ defmodule VideoCall.WebrtcServer do
     offers = Map.put(state.offers, offer_obj.offerer, offer_obj)
     Map.put(state, :offers, offers)
   end
+
+  defp make_genserver_request(genserver, request_type, message) when request_type == :call do
+    genserver
+    |> via_registry()
+    |> GenServer.call(message)
+  end
+
+  defp make_genserver_request(genserver, _request_type, message) do
+    genserver
+    |> via_registry()
+    |> GenServer.cast(message)
+  end
+
+  defp via_registry(name), do: {:via, Registry, {SignallingRegistry, name}}
 end

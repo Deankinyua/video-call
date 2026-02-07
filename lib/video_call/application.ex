@@ -12,7 +12,8 @@ defmodule VideoCall.Application do
       VideoCall.Repo,
       {DNSCluster, query: Application.get_env(:video_call, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: VideoCall.PubSub},
-      {VideoCall.WebrtcServer, []},
+      {Registry, keys: :unique, name: VideoCall.SignallingRegistry},
+      {VideoCall.SignallingSupervisor, []},
       # Start the Finch HTTP client for sending emails
       {Finch, name: VideoCall.Finch},
       # Start a worker by calling: VideoCall.Worker.start_link(arg)
