@@ -3,134 +3,91 @@ defmodule VideoCall.WebrtcServer do
   Holds call information used by the 2 peers
   """
 
-  use GenServer
+  use GenServer, restart: :transient
 
   alias VideoCall.Calls
+  alias VideoCall.SignallingRegistry
 
   @type answerer :: Ecto.UUID.t()
   @type candidate_type :: atom()
-  @type ice_user_id :: Ecto.UUID.t()
+  @type genserver :: String.t()
   @type offer_obj :: map()
-  @type offer_obj_id :: String.t()
-  @type offerer :: Ecto.UUID.t()
 
   @spec start_link(any()) :: GenServer.on_start()
-  def start_link(_opts) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
-  end
+  def start_link(opts), do: GenServer.start_link(__MODULE__, %{offer: nil}, opts)
 
   @impl GenServer
-  def init(_state) do
-    {:ok, %{offers: %{}}}
-  end
+  def init(state), do: {:ok, state}
 
-  @spec store_offer(map()) :: :ok
-  def store_offer(offer_object) do
-    GenServer.call(__MODULE__, {:new_offer, offer_object})
-  end
+  @spec store_offer(genserver(), map()) :: :ok
+  def store_offer(genserver, offer_object),
+    do: make_genserver_request(genserver, :call, {:new_offer, offer_object})
 
-  @spec update_offer(offer_obj_id(), answerer()) :: offer_obj()
-  def update_offer(offer_obj_id, answerer) do
-    GenServer.call(__MODULE__, {:update_offer, offer_obj_id, answerer})
-  end
+  @spec update_offer(genserver(), answerer()) :: offer_obj()
+  def update_offer(genserver, answerer),
+    do: make_genserver_request(genserver, :call, {:update_offer, answerer})
 
-  @spec get_candidates(offer_obj_id(), candidate_type()) :: list()
-  def get_candidates(offer_obj_id, candidate_type) do
-    GenServer.call(__MODULE__, {:get_candidates, offer_obj_id, candidate_type})
-  end
+  @spec get_candidates(genserver(), candidate_type()) :: list()
+  def get_candidates(genserver, candidate_type),
+    do: make_genserver_request(genserver, :call, {:get_candidates, candidate_type})
 
-  @spec add_offerer_candidate(ice_user_id(), any()) :: :ok
-  def add_offerer_candidate(ice_user_id, candidate) do
-    GenServer.cast(__MODULE__, {:add_offerer_candidate, ice_user_id, candidate})
-  end
+  @spec add_offerer_candidate(genserver(), any()) :: :ok
+  def add_offerer_candidate(genserver, candidate),
+    do: make_genserver_request(genserver, :cast, {:add_offerer_candidate, candidate})
 
-  @spec add_answerer_candidate(ice_user_id(), any()) :: :ok
-  def add_answerer_candidate(ice_user_id, candidate) do
-    GenServer.cast(__MODULE__, {:add_answerer_candidate, ice_user_id, candidate})
-  end
-
-  @spec clear_offer_object(offer_obj_id()) :: :ok
-  def clear_offer_object(offer_obj_id) do
-    GenServer.cast(__MODULE__, {:clear_offer_object, offer_obj_id})
-  end
+  @spec add_answerer_candidate(genserver(), any()) :: :ok
+  def add_answerer_candidate(genserver, candidate),
+    do: make_genserver_request(genserver, :cast, {:add_answerer_candidate, candidate})
 
   @impl GenServer
-  def handle_call({:new_offer, offer_object}, _from, state) do
-    offers = Map.put(state.offers, offer_object.offerer, offer_object)
-    state = Map.put(state, :offers, offers)
-
-    {:reply, :ok, state}
+  def handle_call({:new_offer, offer_object}, _from, _state) do
+    {:reply, :ok, %{offer: offer_object}}
   end
 
-  def handle_call({:update_offer, offer_obj_id, answerer}, _from, state) do
-    offer_obj = state.offers[offer_obj_id]
-
+  def handle_call({:update_offer, answerer}, _from, %{offer: offer_obj}) do
     updated_offer_obj = Map.put(offer_obj, :answerer, answerer)
-
-    state = update_offer_object(updated_offer_obj, state)
-
-    {:reply, updated_offer_obj, state}
+    {:reply, updated_offer_obj, %{offer: updated_offer_obj}}
   end
 
-  def handle_call({:get_candidates, offer_obj_id, candidate_type}, _from, state) do
-    offer_obj = state.offers[offer_obj_id]
+  def handle_call({:get_candidates, candidate_type}, _from, %{offer: offer_obj} = state) do
     candidates = Map.get(offer_obj, candidate_type)
-
     {:reply, candidates, state}
   end
 
   @impl GenServer
-  def handle_cast({:add_offerer_candidate, ice_user_id, candidate}, state) do
-    offer_obj = state.offers[ice_user_id]
-
-    state =
-      if offer_obj do
-        answerer = offer_obj.answerer
-        Calls.send_ice_candidate(answerer, candidate)
-
-        ice_candidates = [candidate | offer_obj.offerer_ice_candidates]
-
-        updated_offer_obj = Map.put(offer_obj, :offerer_ice_candidates, ice_candidates)
-
-        update_offer_object(updated_offer_obj, state)
-      else
-        state
-      end
-
-    {:noreply, state}
+  def handle_cast({:add_offerer_candidate, candidate}, %{offer: offer_obj} = state) do
+    if offer_obj do
+      Calls.send_ice_candidate(offer_obj.answerer, candidate)
+      ice_candidates = [candidate | offer_obj.offerer_ice_candidates]
+      updated_offer_obj = Map.put(offer_obj, :offerer_ice_candidates, ice_candidates)
+      {:noreply, %{offer: updated_offer_obj}}
+    else
+      {:noreply, state}
+    end
   end
 
-  def handle_cast({:add_answerer_candidate, ice_user_id, candidate}, state) do
-    offer_obj =
-      Enum.find_value(state.offers, fn {_key, %{answerer: answerer} = value} ->
-        if answerer == ice_user_id, do: value
-      end)
-
-    state =
-      if offer_obj do
-        offerer = offer_obj.offerer
-        Calls.send_ice_candidate(offerer, candidate)
-
-        ice_candidates = [candidate | offer_obj.answerer_ice_candidates]
-
-        updated_offer_obj = Map.put(offer_obj, :answerer_ice_candidates, ice_candidates)
-
-        update_offer_object(updated_offer_obj, state)
-      else
-        state
-      end
-
-    {:noreply, state}
+  def handle_cast({:add_answerer_candidate, candidate}, %{offer: offer_obj} = state) do
+    if offer_obj do
+      Calls.send_ice_candidate(offer_obj.offerer, candidate)
+      ice_candidates = [candidate | offer_obj.answerer_ice_candidates]
+      updated_offer_obj = Map.put(offer_obj, :answerer_ice_candidates, ice_candidates)
+      {:noreply, %{offer: updated_offer_obj}}
+    else
+      {:noreply, state}
+    end
   end
 
-  def handle_cast({:clear_offer_object, offer_obj_id}, state) do
-    updated_offers = Map.delete(state.offers, offer_obj_id)
-    state = Map.put(state, :offers, updated_offers)
-    {:noreply, state}
+  defp make_genserver_request(genserver, request_type, message) when request_type == :call do
+    genserver
+    |> via_registry()
+    |> GenServer.call(message)
   end
 
-  defp update_offer_object(offer_obj, state) do
-    offers = Map.put(state.offers, offer_obj.offerer, offer_obj)
-    Map.put(state, :offers, offers)
+  defp make_genserver_request(genserver, _request_type, message) do
+    genserver
+    |> via_registry()
+    |> GenServer.cast(message)
   end
+
+  defp via_registry(name), do: {:via, Registry, {SignallingRegistry, name}}
 end

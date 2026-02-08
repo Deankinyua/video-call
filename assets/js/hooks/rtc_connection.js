@@ -142,9 +142,7 @@ RtcConnectionHooks.RtcConnection = {
     //* set answer as the localDescription of the answerer
     await this.peerConnection.setLocalDescription(answer);
 
-    this.pushEvent("add_offerer_ice_candidates_to_answerer", {
-      offer_obj_id: offerObj.offerer,
-    });
+    this.pushEvent("add_offerer_ice_candidates_to_answerer", {});
 
     this.pushEvent("set_remote_description_of_offerer", {
       answer: answer,

@@ -5,6 +5,7 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   alias VideoCall.Calls
   alias VideoCall.Contacts
+  alias VideoCall.SignallingSupervisor
   alias VideoCall.WebrtcServer
   alias VideoCallWeb.ContactComponent
 
@@ -95,6 +96,9 @@ defmodule VideoCallWeb.VideoLive.Index do
 
   @impl Phoenix.LiveView
   def handle_event("new_offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
+    genserver = genserver_name(user.username)
+    SignallingSupervisor.start_server(genserver)
+
     offer_object = %{
       offerer: user.username,
       offer: offer,
@@ -104,18 +108,17 @@ defmodule VideoCallWeb.VideoLive.Index do
       answerer_ice_candidates: []
     }
 
-    :ok = WebrtcServer.store_offer(offer_object)
-
-    {:noreply, socket}
+    :ok = WebrtcServer.store_offer(genserver, offer_object)
+    {:noreply, assign(socket, :genserver, genserver)}
   end
 
   def handle_event(
         "accept_call",
         _params,
-        %{assigns: %{peer_2: caller, current_user: user}} = socket
+        %{assigns: %{current_user: user, genserver: genserver, peer_2: caller}} = socket
       ) do
     answerer = user.username
-    offer_obj = WebrtcServer.update_offer(caller, answerer)
+    offer_obj = WebrtcServer.update_offer(genserver, answerer)
     Calls.notify_remote_peer_of_call_acceptance(caller, answerer)
 
     {:noreply,
@@ -129,7 +132,7 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "decline_call",
         _params,
-        %{assigns: %{peer_2: caller, current_user: user}} = socket
+        %{assigns: %{current_user: user, peer_2: caller}} = socket
       ) do
     Calls.send_decline_call_notification(caller, user.username)
 
@@ -142,23 +145,22 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "send_ice_candidate_to_signalling_server",
         %{"did_i_offer" => from_offerer?, "ice_candidate" => candidate},
-        %{assigns: %{current_user: user}} = socket
+        %{assigns: %{genserver: genserver}} = socket
       ) do
-    ice_user_id = user.username
-
     if from_offerer?,
-      do: WebrtcServer.add_offerer_candidate(ice_user_id, candidate),
-      else: WebrtcServer.add_answerer_candidate(ice_user_id, candidate)
+      do: WebrtcServer.add_offerer_candidate(genserver, candidate),
+      else: WebrtcServer.add_answerer_candidate(genserver, candidate)
 
     {:noreply, socket}
   end
 
   def handle_event(
         "add_offerer_ice_candidates_to_answerer",
-        %{"offer_obj_id" => offer_obj_id},
-        socket
+        _params,
+        %{assigns: %{genserver: genserver}} = socket
       ) do
-    offerer_ice_candidates = WebrtcServer.get_candidates(offer_obj_id, :offerer_ice_candidates)
+    offerer_ice_candidates =
+      WebrtcServer.get_candidates(genserver, :offerer_ice_candidates)
 
     {:noreply,
      push_event(socket, "offerer_ice_candidates", %{candidates: offerer_ice_candidates})}
@@ -167,11 +169,10 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "end_call",
         _params,
-        %{assigns: %{current_user: user, peer_2: peer_2}} = socket
+        %{assigns: %{current_user: user, genserver: genserver, peer_2: peer_2}} = socket
       ) do
     Calls.notify_remote_peer_of_call_termination(peer_2, user.username)
-    WebrtcServer.clear_offer_object(user.username)
-    WebrtcServer.clear_offer_object(peer_2)
+    SignallingSupervisor.stop_server(genserver)
 
     {:noreply,
      socket
@@ -185,10 +186,10 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "stop_calling",
         _params,
-        %{assigns: %{peer_2: peer_2, current_user: user}} = socket
+        %{assigns: %{current_user: user, genserver: genserver, peer_2: peer_2}} = socket
       ) do
     Calls.send_missed_call_notification(peer_2, user.username)
-    WebrtcServer.clear_offer_object(user.username)
+    SignallingSupervisor.stop_server(genserver)
 
     {:noreply,
      socket
@@ -209,10 +210,9 @@ defmodule VideoCallWeb.VideoLive.Index do
   def handle_event(
         "peer_connection_disconnected",
         _params,
-        %{assigns: %{current_user: user, peer_2: peer_2}} = socket
+        %{assigns: %{genserver: genserver, peer_2: peer_2}} = socket
       ) do
-    WebrtcServer.clear_offer_object(user.username)
-    WebrtcServer.clear_offer_object(peer_2)
+    SignallingSupervisor.stop_server(genserver)
 
     {:noreply,
      socket
@@ -293,11 +293,8 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   # negative scenarios, call declined or call terminated
-  def handle_info(
-        {:call_declined, callee_username},
-        %{assigns: %{current_user: user}} = socket
-      ) do
-    WebrtcServer.clear_offer_object(user.username)
+  def handle_info({:call_declined, callee_username}, %{assigns: %{genserver: genserver}} = socket) do
+    SignallingSupervisor.stop_server(genserver)
 
     {:noreply,
      socket
@@ -333,11 +330,8 @@ defmodule VideoCallWeb.VideoLive.Index do
      |> assign(:show_incoming_call_notification?, false)}
   end
 
-  def handle_info(
-        :line_busy,
-        %{assigns: %{peer_2: peer_2, current_user: user}} = socket
-      ) do
-    WebrtcServer.clear_offer_object(user.username)
+  def handle_info(:line_busy, %{assigns: %{genserver: genserver, peer_2: peer_2}} = socket) do
+    SignallingSupervisor.stop_server(genserver)
 
     {:noreply,
      socket
@@ -386,9 +380,14 @@ defmodule VideoCallWeb.VideoLive.Index do
   end
 
   defp handle_incoming_call(_on_call?, _being_called?, _calling_someone?, caller, socket) do
+    genserver = genserver_name(caller)
+
     {:noreply,
      socket
+     |> assign(:genserver, genserver)
      |> assign(:peer_2, caller)
      |> assign(:show_incoming_call_notification?, true)}
   end
+
+  defp genserver_name(caller), do: "#{caller}_server"
 end
