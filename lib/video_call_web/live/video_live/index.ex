@@ -97,7 +97,6 @@ defmodule VideoCallWeb.VideoLive.Index do
   @impl Phoenix.LiveView
   def handle_event("new_offer", %{"offer" => offer}, %{assigns: %{current_user: user}} = socket) do
     genserver = genserver_name(user.username)
-
     SignallingSupervisor.start_server(genserver)
 
     offer_object = %{
@@ -110,7 +109,6 @@ defmodule VideoCallWeb.VideoLive.Index do
     }
 
     :ok = WebrtcServer.store_offer(genserver, offer_object)
-
     {:noreply, assign(socket, :genserver, genserver)}
   end
 
