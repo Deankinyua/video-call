@@ -4,13 +4,50 @@ defmodule VideoCall.AccountsTest do
   import VideoCall.AccountsFixtures
 
   alias VideoCall.Accounts
-  alias VideoCall.Accounts.User
   alias VideoCall.Accounts.UserToken
 
   defp create_user_and_token(_attrs) do
     user = user_fixture()
     token = Accounts.generate_user_session_token(user)
     %{user: user, token: token}
+  end
+
+  describe "get_or_create_user/1" do
+    setup [:create_user_and_token]
+
+    test "returns a user with the existing credentials if they exist", %{user: user} do
+      assert {:ok, retrieved_user} = Accounts.get_or_create_user(user)
+      assert retrieved_user.email == user.email
+    end
+
+    test "creates a user with the credentials if one doesn't exist" do
+      attrs = %{
+        avatar: "https://random.avatar",
+        email: "onegoodemail@email.com",
+        username: "agoodusername"
+      }
+
+      assert {:ok, retrieved_user} = Accounts.get_or_create_user(attrs)
+      assert retrieved_user.avatar == attrs.avatar
+      assert retrieved_user.email == attrs.email
+      assert retrieved_user.username == attrs.username
+    end
+
+    test "fails to create a new user with invalid params" do
+      attrs = %{
+        avatar: "",
+        email: "",
+        username: ""
+      }
+
+      assert {:error, changeset} = Accounts.get_or_create_user(attrs)
+
+      assert %{
+               avatar: ["can't be blank"],
+               email: ["can't be blank"],
+               username: ["can't be blank"]
+             } = errors_on(changeset)
+    end
   end
 
   describe "get_user_by_email/1" do
@@ -27,24 +64,6 @@ defmodule VideoCall.AccountsTest do
     end
   end
 
-  describe "get_user_by_email_and_password/2" do
-    test "does not return the user if the email does not exist" do
-      _user = user_fixture(%{email: "deankinyua@gmail.com"})
-      refute Accounts.get_user_by_email_and_password("unknown@example.com", "helloworldkenya")
-    end
-
-    test "does not return the user if the password is not valid" do
-      user = user_fixture(%{email: "deankinyua@gmail.com", password: "johndoesoftwaredev"})
-      refute Accounts.get_user_by_email_and_password(user.email, "invalid")
-    end
-
-    test "returns the user if the email and password are valid" do
-      user = user_fixture(%{email: "deankinyua@gmail.com", password: "johndoesoftwaredev"})
-
-      assert Accounts.get_user_by_email_and_password(user.email, "johndoesoftwaredev")
-    end
-  end
-
   describe "get_user!/1" do
     setup [:create_user_and_token]
 
@@ -58,80 +77,58 @@ defmodule VideoCall.AccountsTest do
   end
 
   describe "register_user/1" do
-    test "requires email and password to be set" do
+    test "requires avatar, email and username to be set" do
       {:error, changeset} = Accounts.register_user(%{})
 
       assert %{
-               password: ["can't be blank"],
-               email: ["can't be blank"]
+               avatar: ["can't be blank"],
+               email: ["can't be blank"],
+               username: ["can't be blank"]
              } = errors_on(changeset)
-    end
-
-    test "validates email and password when given" do
-      {:error, changeset} = Accounts.register_user(%{email: "not valid", password: "nod"})
-
-      assert %{
-               email: ["must have the @ sign and no spaces"],
-               password: ["should be at least 5 character(s)"]
-             } = errors_on(changeset)
-    end
-
-    test "validates maximum values for email and password for security" do
-      very_long_string = String.duplicate("db", 100)
-
-      {:error, changeset} =
-        Accounts.register_user(%{email: very_long_string, password: very_long_string})
-
-      assert "should be at most 160 character(s)" in errors_on(changeset).email
-      assert "should be at most 72 character(s)" in errors_on(changeset).password
     end
 
     test "validates email uniqueness" do
       user = user_fixture()
 
-      {:error, changeset} = Accounts.register_user(%{email: user.email})
+      {:error, changeset} =
+        Accounts.register_user(%{avatar: user.avatar, email: user.email, username: user.username})
+
       assert "has already been taken" in errors_on(changeset).email
 
       # Now try with the upper cased email too, to check that email case is ignored.
-      {:error, changeset_2} = Accounts.register_user(%{email: String.upcase(user.email)})
+      {:error, changeset_2} =
+        Accounts.register_user(%{
+          avatar: user.avatar,
+          email: String.upcase(user.email),
+          username: user.username
+        })
+
       assert "has already been taken" in errors_on(changeset_2).email
     end
 
-    test "registers users with a hashed password" do
+    test "validates username uniqueness" do
+      user = user_fixture()
+      email = unique_user_email()
+
+      {:error, changeset} =
+        Accounts.register_user(%{avatar: user.avatar, email: email, username: user.username})
+
+      assert "has already been taken" in errors_on(changeset).username
+    end
+
+    test "with valid avatar, email and username, registers users" do
       email = unique_user_email()
       username = unique_username()
 
       {:ok, user} =
-        Accounts.register_user(%{email: email, password: "hello world kenya", username: username})
+        Accounts.register_user(%{
+          avatar: "https://lh3.googleusercontent.com/a/anything",
+          email: email,
+          username: username
+        })
 
       assert user.email == email
       assert user.username == username
-      assert is_binary(user.hashed_password)
-      assert is_nil(user.password)
-    end
-  end
-
-  describe "change_user_registration/2" do
-    test "returns a changeset" do
-      assert %Ecto.Changeset{} = _changeset = Accounts.change_user_registration(%User{})
-    end
-
-    test "allows fields to be set" do
-      email = unique_user_email()
-      username = unique_username()
-      password = "helloworldkenya"
-
-      changeset =
-        Accounts.change_user_registration(
-          %User{},
-          %{email: email, password: password, username: username}
-        )
-
-      assert changeset.valid?
-      assert get_change(changeset, :email) == email
-      assert get_change(changeset, :password) == password
-      assert get_change(changeset, :username) == username
-      assert is_nil(get_change(changeset, :hashed_password))
     end
   end
 
@@ -178,9 +175,17 @@ defmodule VideoCall.AccountsTest do
   describe "delete_user_session_token/1" do
     setup [:create_user_and_token]
 
-    test "deletes the token", %{token: token} do
+    test "deletes the token", %{user: user} do
+      token = Accounts.generate_user_session_token(user)
       assert Accounts.delete_user_session_token(token) == :ok
       refute Accounts.get_user_by_session_token(token)
+    end
+
+    test "deletes all tokens for the given user", %{user: user} do
+      token = Accounts.generate_user_session_token(user)
+
+      assert Accounts.clear_all_tokens_for_user(user) == :ok
+      assert Accounts.get_user_by_session_token(token) == nil
     end
   end
 

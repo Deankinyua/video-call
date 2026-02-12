@@ -20,10 +20,11 @@ RtcConnectionHooks.RtcConnection = {
         {
           urls: "stun:157.173.115.229:3478",
         },
+
         {
           urls: "turn:157.173.115.229:3478",
-          username: "dean",
-          credential: "cobraKinyua",
+          username: "zcobra",
+          credential: "you_cannot_save_her",
         },
       ],
     };

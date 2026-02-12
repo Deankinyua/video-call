@@ -33,13 +33,12 @@ defmodule VideoCallWeb.UserAuth do
   @spec log_in_user(plug_conn(), User.t(), map()) :: plug_conn()
   def log_in_user(conn, user, params \\ %{}) do
     token = Accounts.generate_user_session_token(user)
-    user_return_to = get_session(conn, :user_return_to)
 
     conn
     |> renew_session()
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: signed_in_path(conn))
   end
 
   @doc """
@@ -59,7 +58,7 @@ defmodule VideoCallWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/sign-in")
+    |> redirect(to: ~p"/")
   end
 
   @doc """
@@ -124,7 +123,7 @@ defmodule VideoCallWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/sign-in")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
 
       {:halt, socket}
     end
@@ -166,8 +165,8 @@ defmodule VideoCallWeb.UserAuth do
       conn
     else
       conn
-      |> maybe_store_return_to()
-      |> redirect(to: ~p"/sign-in")
+      |> put_flash(:error, "You must log in to access this page.")
+      |> redirect(to: ~p"/")
       |> halt()
     end
   end
@@ -203,13 +202,10 @@ defmodule VideoCallWeb.UserAuth do
     end)
   end
 
-  defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}) do
-    put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
-  end
+  defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}),
+    do: put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
 
-  defp maybe_write_remember_me_cookie(conn, _token, _params) do
-    conn
-  end
+  defp maybe_write_remember_me_cookie(conn, _token, _params), do: conn
 
   defp ensure_user_token(conn) do
     if token = get_session(conn, :user_token) do
@@ -231,11 +227,5 @@ defmodule VideoCallWeb.UserAuth do
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
 
-  defp maybe_store_return_to(%{method: "GET"} = conn) do
-    put_session(conn, :user_return_to, current_path(conn))
-  end
-
-  defp maybe_store_return_to(conn), do: conn
-
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_conn), do: ~p"/call"
 end

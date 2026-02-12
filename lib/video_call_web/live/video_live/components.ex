@@ -5,11 +5,10 @@ defmodule VideoCallWeb.VideoLive.Components do
 
   use VideoCallWeb, :html
 
-  import VideoCallWeb.Components
-
   @type assigns :: map()
   @type rendered :: Phoenix.LiveView.Rendered.t()
 
+  attr :avatar, :string, required: true
   attr :caller, :string, required: true
   attr :show?, :boolean, required: true
 
@@ -27,7 +26,7 @@ defmodule VideoCallWeb.VideoLive.Components do
       <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl min-w-[320px]">
         <div class="relative shrink-0">
           <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-white/20">
-            <.default_avatar fill="#1A1A1A" />
+            <img src={@avatar} class="w-full h-full object-cover" />
           </div>
 
           <span class="absolute bottom-0 right-0 block h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-black/40 animate-pulse">
@@ -72,6 +71,7 @@ defmodule VideoCallWeb.VideoLive.Components do
     """
   end
 
+  attr :avatar, :string, required: true
   attr :callee, :string, required: true
   attr :show?, :boolean, required: true
 
@@ -99,7 +99,7 @@ defmodule VideoCallWeb.VideoLive.Components do
           </div>
 
           <div class="relative w-32 h-32 rounded-full overflow-hidden md:w-40 md:h-40">
-            <.default_avatar fill="#1A1A1A" />
+            <img src={@avatar} class="w-full h-full object-cover" />
           </div>
         </div>
 
