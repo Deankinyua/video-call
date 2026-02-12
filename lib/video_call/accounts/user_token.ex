@@ -36,7 +36,7 @@ defmodule VideoCall.Accounts.UserToken do
 
   The reason why we store session tokens in the database, even
   though Phoenix already provides a session cookie, is because
-  Phoenix' default session cookies are not persisted, they are
+  Phoenix's default session cookies are not persisted, they are
   simply signed and potentially encrypted. This means they are
   valid indefinitely, unless you change the signing/encryption
   salt.
@@ -49,8 +49,9 @@ defmodule VideoCall.Accounts.UserToken do
   session they deem invalid.
   """
 
+  # returns a token (random gibberish) and a UserToken struct that is yet to be inserted
   @spec build_session_token(user()) :: {token(), t()}
-  def build_session_token(user) do
+  def build_session_token(%User{} = user) do
     token = :crypto.strong_rand_bytes(@rand_size)
     {token, %UserToken{token: token, context: "session", user_id: user.id}}
   end
@@ -66,7 +67,7 @@ defmodule VideoCall.Accounts.UserToken do
   @spec verify_session_token_query(token()) :: {:ok, Ecto.Query.t()}
   def verify_session_token_query(token) do
     query =
-      from token in by_token_and_context_query(token, "session"),
+      from token in token_and_context_query(token, "session"),
         join: user in assoc(token, :user),
         where: token.inserted_at > ago(@session_validity_in_days, "day"),
         select: user
@@ -77,16 +78,16 @@ defmodule VideoCall.Accounts.UserToken do
   @doc """
   Returns the token struct for the given token value and context.
   """
-  @spec by_token_and_context_query(token(), binary()) :: Ecto.Query.t()
-  def by_token_and_context_query(token, context) do
+  @spec token_and_context_query(token(), binary()) :: Ecto.Query.t()
+  def token_and_context_query(token, context) do
     from UserToken, where: [token: ^token, context: ^context]
   end
 
   @doc """
   Gets all tokens for the given user for the given contexts.
   """
-  @spec by_user_and_contexts_query(user(), :all) :: Ecto.Query.t()
-  def by_user_and_contexts_query(user, :all) do
+  @spec user_and_contexts_query(user(), :all) :: Ecto.Query.t()
+  def user_and_contexts_query(user, :all) do
     from t in UserToken, where: t.user_id == ^user.id
   end
 end

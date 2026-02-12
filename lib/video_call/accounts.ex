@@ -15,7 +15,6 @@ defmodule VideoCall.Accounts do
   @type email :: String.t()
   @type filters :: map()
   @type id :: Ecto.UUID.t()
-  @type password :: String.t()
   @type token :: binary()
   @type user :: User.t()
 
@@ -57,6 +56,17 @@ defmodule VideoCall.Accounts do
 
   defp apply_filter(_other, dynamic), do: dynamic
 
+  @spec get_or_create_user(attrs()) :: {:ok, user()} | {:error, changeset()}
+  def get_or_create_user(%{email: email} = user) do
+    case get_user_by_email(email) do
+      nil ->
+        register_user(user)
+
+      user ->
+        {:ok, user}
+    end
+  end
+
   @doc """
   Gets a user by email.
 
@@ -72,25 +82,6 @@ defmodule VideoCall.Accounts do
   @spec get_user_by_email(email()) :: user() | nil
   def get_user_by_email(email) when is_binary(email) do
     Repo.get_by(User, email: email)
-  end
-
-  @doc """
-  Gets a user by email and password.
-
-  ## Examples
-
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
-      %User{}
-
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
-      nil
-
-  """
-  @spec get_user_by_email_and_password(email(), password()) :: user() | nil
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
-    if User.valid_password?(user, password), do: user
   end
 
   @doc """
@@ -125,9 +116,9 @@ defmodule VideoCall.Accounts do
 
   """
   @spec register_user(attrs()) :: {:ok, user()} | {:error, changeset()}
-  def register_user(attrs) do
+  def register_user(attrs \\ %{}) do
     %User{}
-    |> User.registration_changeset(attrs)
+    |> change_user(attrs)
     |> Repo.insert()
   end
 
@@ -136,13 +127,13 @@ defmodule VideoCall.Accounts do
 
   ## Examples
 
-      iex> change_user_registration(user)
+      iex> change_user(user)
       %Ecto.Changeset{data: %User{}}
 
   """
-  @spec change_user_registration(user(), attrs()) :: changeset()
-  def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
+  @spec change_user(user(), attrs()) :: changeset()
+  def change_user(%User{} = user, attrs \\ %{}) do
+    User.user_changeset(user, attrs)
   end
 
   @doc """
@@ -169,10 +160,26 @@ defmodule VideoCall.Accounts do
   """
   @spec delete_user_session_token(token()) :: :ok
   def delete_user_session_token(token) do
-    token
-    |> UserToken.by_token_and_context_query("session")
-    |> Repo.delete_all()
+    query = UserToken.token_and_context_query(token, "session")
+    Repo.delete_all(query)
 
+    :ok
+  end
+
+  @doc """
+  Deletes all remaining tokens from db that belong to user.
+  It will be called when logging in to ensure all tokens are deleted before we create a new one
+
+  ## Examples
+
+      iex> clear_all_tokens_for_user(%ElixirDrops.Accounts.User{})
+      :ok
+
+  """
+  @spec clear_all_tokens_for_user(user()) :: :ok
+  def clear_all_tokens_for_user(user) do
+    q = UserToken.user_and_contexts_query(user, :all)
+    Repo.delete_all(q)
     :ok
   end
 end
