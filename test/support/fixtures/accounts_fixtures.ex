@@ -28,8 +28,8 @@ defmodule VideoCall.AccountsFixtures do
     {:ok, user} =
       attrs
       |> Enum.into(%{
+        avatar: "https://lh3.googleusercontent.com/a/anything",
         email: unique_user_email(),
-        password: "helloworldkenya",
         username: unique_username()
       })
       |> VideoCall.Accounts.register_user()
