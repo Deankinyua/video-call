@@ -40,7 +40,7 @@ defmodule VideoCallWeb.ContactLive.Index do
             id={dom_id}
             class="flex items-center justify-between p-4 bg-zinc-900/40 border border-white/5 rounded-2xl hover:bg-zinc-900/60 hover:border-emerald-500/30 transition-all duration-300 group"
           >
-            <.user_component user={user} />
+            <.user_component avatar={@current_user.avatar} user={user} />
           </div>
         </section>
 

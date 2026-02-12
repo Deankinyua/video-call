@@ -51,6 +51,7 @@ defmodule VideoCallWeb.VideoLive.Index do
               <.live_component
                 id={"contact-#{contact.id}"}
                 module={ContactComponent}
+                avatar={@current_user.avatar}
                 username={contact.contact_user.username}
               />
             </div>
@@ -58,11 +59,19 @@ defmodule VideoCallWeb.VideoLive.Index do
         </div>
       </section>
 
-      <.outgoing_call_notification callee={@peer_2} show?={@show_outgoing_call_notification?} />
+      <.outgoing_call_notification
+        avatar={@current_user.avatar}
+        callee={@peer_2}
+        show?={@show_outgoing_call_notification?}
+      />
 
       <div class="py-10 px-4">
         <div id="videos" class="relative">
-          <.incoming_call_notification caller={@peer_2} show?={@show_incoming_call_notification?} />
+          <.incoming_call_notification
+            avatar={@current_user.avatar}
+            caller={@peer_2}
+            show?={@show_incoming_call_notification?}
+          />
           <.local_video class={@local_video_class} />
           <.remote_video class={@remote_video_class} />
           <div class="mx-auto max-w-[30rem]">

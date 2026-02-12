@@ -5,8 +5,6 @@ defmodule VideoCallWeb.ContactLive.Components do
 
   use VideoCallWeb, :html
 
-  import VideoCallWeb.Components
-
   alias VideoCall.Accounts.User
 
   @type assigns :: map()
@@ -135,6 +133,7 @@ defmodule VideoCallWeb.ContactLive.Components do
     """
   end
 
+  attr :avatar, :string, required: true
   attr :user, User, required: true
 
   @spec user_component(assigns()) :: rendered()
@@ -142,7 +141,7 @@ defmodule VideoCallWeb.ContactLive.Components do
     ~H"""
     <div class="flex items-center gap-4">
       <div class="h-12 w-12 rounded-full overflow-hidden flex items-center justify-center text-zinc-400 font-bold">
-        <.default_avatar fill="#1A1A1A" />
+        <img src={@avatar} class="w-full h-full object-cover" />
       </div>
 
       <div>
