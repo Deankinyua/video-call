@@ -36,15 +36,6 @@ defmodule VideoCallWeb.UserAuthTest do
       refute get_session(conn, :to_be_removed)
     end
 
-    test "redirects to the configured path", %{conn: conn, user: user} do
-      conn =
-        conn
-        |> put_session(:user_return_to, "/contacts")
-        |> UserAuth.log_in_user(user)
-
-      assert redirected_to(conn) == "/contacts"
-    end
-
     test "writes a cookie if remember_me is configured", %{conn: conn, user: user} do
       conn =
         conn
@@ -295,32 +286,6 @@ defmodule VideoCallWeb.UserAuthTest do
       assert conn.assigns.flash["error"] == "You must log in to access this page."
       assert redirected_to(conn) == ~p"/"
     end
-
-    # test "stores the path to redirect to on GET", %{conn: conn} do
-    #   halted_conn_1 =
-    #     %{conn | path_info: ["foo"], query_string: ""}
-    #     |> fetch_flash()
-    #     |> UserAuth.require_authenticated_user([])
-
-    #   assert halted_conn_1.halted
-    #   assert get_session(halted_conn_1, :user_return_to) == "/foo"
-
-    #   halted_conn_2 =
-    #     %{conn | path_info: ["foo"], query_string: "bar=baz"}
-    #     |> fetch_flash()
-    #     |> UserAuth.require_authenticated_user([])
-
-    #   assert halted_conn_2.halted
-    #   assert get_session(halted_conn_2, :user_return_to) == "/foo?bar=baz"
-
-    #   halted_conn_3 =
-    #     %{conn | path_info: ["foo"], query_string: "bar", method: "POST"}
-    #     |> fetch_flash()
-    #     |> UserAuth.require_authenticated_user([])
-
-    #   assert halted_conn_3.halted
-    #   refute get_session(halted_conn_3, :user_return_to)
-    # end
 
     test "does not redirect if user is authenticated", %{conn: conn, user: user} do
       conn =

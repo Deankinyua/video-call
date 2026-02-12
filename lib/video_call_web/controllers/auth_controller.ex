@@ -13,7 +13,8 @@ defmodule VideoCallWeb.AuthController do
 
   use VideoCallWeb, :controller
 
-  plug :store_return_to when action in [:request]
+  # * Will be useful when you want to redirect users to the same route they initially were on
+  # plug :store_return_to when action in [:request]
   plug Ueberauth
 
   import Plug.Conn
@@ -73,9 +74,12 @@ defmodule VideoCallWeb.AuthController do
     first_name <> suffix
   end
 
-  defp store_return_to(%{params: %{"return_to" => return_to}} = conn, _opts)
-       when is_binary(return_to),
-       do: put_session(conn, :user_return_to, return_to)
+  # * Leave this here. It will be useful when you want to redirect users
+  # * to the same route they were on after they successfully log in
 
-  defp store_return_to(conn, _opts), do: conn
+  # defp store_return_to(%{params: %{"return_to" => return_to}} = conn, _opts)
+  #      when is_binary(return_to),
+  #      do: put_session(conn, :user_return_to, return_to)
+
+  # defp store_return_to(conn, _opts), do: conn
 end

@@ -33,13 +33,12 @@ defmodule VideoCallWeb.UserAuth do
   @spec log_in_user(plug_conn(), User.t(), map()) :: plug_conn()
   def log_in_user(conn, user, params \\ %{}) do
     token = Accounts.generate_user_session_token(user)
-    user_return_to = get_session(conn, :user_return_to)
 
     conn
     |> renew_session()
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: signed_in_path(conn))
   end
 
   @doc """
@@ -166,7 +165,6 @@ defmodule VideoCallWeb.UserAuth do
       conn
     else
       conn
-      |> maybe_store_return_to()
       |> put_flash(:error, "You must log in to access this page.")
       |> redirect(to: ~p"/")
       |> halt()
@@ -228,12 +226,6 @@ defmodule VideoCallWeb.UserAuth do
     |> put_session(:user_token, token)
     |> put_session(:live_socket_id, "users_sessions:#{Base.url_encode64(token)}")
   end
-
-  defp maybe_store_return_to(%{method: "GET"} = conn) do
-    put_session(conn, :user_return_to, current_path(conn))
-  end
-
-  defp maybe_store_return_to(conn), do: conn
 
   defp signed_in_path(_conn), do: ~p"/call"
 end
