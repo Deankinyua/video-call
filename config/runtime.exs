@@ -37,6 +37,22 @@ end
 
 # * This configuration will be invoked for the production environment only
 if config_env() == :prod do
+  google_client_id =
+    System.get_env("GOOGLE_CLIENT_ID") ||
+      raise """
+      environment variable GOOGLE_CLIENT_ID is missing.
+      """
+
+  google_client_secret =
+    System.get_env("GOOGLE_CLIENT_SECRET") ||
+      raise """
+      environment variable GOOGLE_CLIENT_SECRET is missing.
+      """
+
+  config :ueberauth, Ueberauth.Strategy.Google.OAuth,
+    client_id: google_client_id,
+    client_secret: google_client_secret
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

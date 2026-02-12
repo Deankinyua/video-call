@@ -59,7 +59,7 @@ defmodule VideoCallWeb.UserAuth do
     conn
     |> renew_session()
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/sign-in")
+    |> redirect(to: ~p"/")
   end
 
   @doc """
@@ -124,7 +124,7 @@ defmodule VideoCallWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/sign-in")
+        |> Phoenix.LiveView.redirect(to: ~p"/")
 
       {:halt, socket}
     end
@@ -167,7 +167,7 @@ defmodule VideoCallWeb.UserAuth do
     else
       conn
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/sign-in")
+      |> redirect(to: ~p"/")
       |> halt()
     end
   end
@@ -203,13 +203,10 @@ defmodule VideoCallWeb.UserAuth do
     end)
   end
 
-  defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}) do
-    put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
-  end
+  defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}),
+    do: put_resp_cookie(conn, @remember_me_cookie, token, @remember_me_options)
 
-  defp maybe_write_remember_me_cookie(conn, _token, _params) do
-    conn
-  end
+  defp maybe_write_remember_me_cookie(conn, _token, _params), do: conn
 
   defp ensure_user_token(conn) do
     if token = get_session(conn, :user_token) do
@@ -237,5 +234,5 @@ defmodule VideoCallWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_conn), do: ~p"/call"
 end

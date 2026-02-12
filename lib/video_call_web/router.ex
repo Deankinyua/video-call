@@ -23,19 +23,11 @@ defmodule VideoCallWeb.Router do
   # end
 
   scope "/", VideoCallWeb do
-    pipe_through [:browser]
-
-    delete "/sign-out", UserSessionController, :delete
-    post "/sign-in", UserSessionController, :create
-  end
-
-  scope "/", VideoCallWeb do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
       on_mount: [{VideoCallWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/sign-up", AuthLive.SignUp, :new
-      live "/sign-in", AuthLive.SignIn, :new
+      live "/", HomeLive.Index, :index
     end
   end
 
@@ -45,9 +37,18 @@ defmodule VideoCallWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{VideoCallWeb.UserAuth, :ensure_authenticated}] do
-      live "/", VideoLive.Index, :index
+      live "/call", VideoLive.Index, :index
       live "/contacts", ContactLive.Index, :index
     end
+  end
+
+  scope "/auth", VideoCallWeb do
+    pipe_through :browser
+
+    get "/logout", AuthController, :logout
+
+    get "/:provider", AuthController, :request
+    get "/:provider/callback", AuthController, :callback
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

@@ -9,7 +9,7 @@ defmodule VideoCall.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: ne3ko_deps() ++ phoenix_deps(),
+      deps: ne3ko_deps() ++ app_deps() ++ phoenix_deps(),
       dialyzer: [
         # Put the project-level PLT in the priv/ directory (instead of the default _build/ location)
         plt_add_apps: [:ex_unit, :mix],
@@ -65,6 +65,12 @@ defmodule VideoCall.MixProject do
       {:ex_doc, "~> 0.34", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
       {:mix_audit, "~> 2.1", only: :test, runtime: false}
+    ]
+  end
+
+  defp app_deps do
+    [
+      {:ueberauth_google, "~> 0.10"}
     ]
   end
 
