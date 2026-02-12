@@ -32,7 +32,6 @@ defmodule VideoCallWeb.Router do
   end
 
   scope "/", VideoCallWeb do
-    # pipe_through the :require_authenticated_user plug imported from VideoCallWeb.UserAuth
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
