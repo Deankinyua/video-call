@@ -2,8 +2,6 @@
 
 **Sign up** at [Easy Video Call](https://easy-video-call.fly.dev/)
 
-https://github.com/user-attachments/assets/38bd9b91-d94b-4894-a068-f0ca5036652d
-
 # Easy Video Call
 
 A **video calling** application made with **Phoenix/Elixir** that utilizes **WebRTC**.
