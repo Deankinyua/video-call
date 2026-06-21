@@ -69,6 +69,9 @@ defmodule VideoCallWeb.UserAuth do
   def fetch_current_user(conn, _opts) do
     {user_token, conn} = ensure_user_token(conn)
     user = user_token && Accounts.get_user_by_session_token(user_token)
+    # You have to explicity set this to allow cross-origin requests
+    # If you don't set the browser outputs a CORS error message
+    # * conn = put_resp_header(conn, "access-control-allow-origin", "*")
     assign(conn, :current_user, user)
   end
 
