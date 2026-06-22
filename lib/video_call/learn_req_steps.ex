@@ -9,8 +9,16 @@ defmodule VideoCall.LearnReqSteps do
       request
     end
 
-    Req.new(url: "https://elixir-lang.org")
+    # * Req is nothing but an HTTP client - CORS errors do not exist inside Req
+    # * CORS applies when using the fetch API though as it implements it
+
+    Req.new(url: "https://skeptic.bot/questions/bbebcf5e-c6a4-4b40-807d-ae1b797abaf8")
     |> Req.Request.append_request_steps(debug_url: debug_url)
     |> Req.get!()
+  end
+
+  def make_req_bin_request do
+    req = Req.new(url: "https://reqbin.org/html")
+    Req.get!(req)
   end
 end
