@@ -7,6 +7,9 @@ defmodule VideoCall.Repo.Migrations.CreateUsersAuthTables do
     create table(:users, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :avatar, :string, null: false
+
+      # postgres will now treat KINYUADEAN@gmail.com
+      # as the same string as kinyuadean@gmail.com
       add :email, :citext, null: false
       add :username, :string, null: false
 
@@ -14,6 +17,8 @@ defmodule VideoCall.Repo.Migrations.CreateUsersAuthTables do
     end
 
     # users cannnot share an email
+    # if some user had inserted KINYUADEAN@gmail.com
+    # the DB will prevent another one from inserting kinyuadean@gmail.com
     create unique_index(:users, [:email])
 
     # users cannnot share a username
